@@ -48,4 +48,8 @@ ehthumbs.db
 Thumbs.db
 
 # Logs
-*.log 
+*.log
+
+# Project specific folders
+plan/
+related_work/ 
