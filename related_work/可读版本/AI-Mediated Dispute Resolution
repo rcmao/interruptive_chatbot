@@ -1,0 +1,237 @@
+Abstract
+We examine the effectiveness of large language model (LLM) mediations in the under-studied dispute resolution domain. We first used a new corpus of dispute resolutions, KODIS, to investigate if LLMs can correctly identify whether to inter- vene. We find evidence that GPT as a mediator picks up on salient aspects of a dispute, such as Frustration and whether the disputants ultimately come to a resolution or stall at an impasse — intervening significantly more so in cases of high frustration and impasse. Afterward, we ran a user study to compare GPT mediations against those of novice human me- diators. We find participants agreed GPT’s mediations were more likely to lead to resolution; were better positioned in the dialog; had better justification than human-crafted ones; and, on a forced choice, were generally more effective than novice human mediations.
+Background
+Human-AI collaboration typically envisions fully collabora- tive settings where participants, human or AI, work towards a common goal. Thus, collaboration is a problem of dele- gation, advice, and coordination. Recent dialog systems re- search highlights that real-world collaboration involves con- flict and negotiation, thus requiring sophisticated social rea- soning (Chawla et al. 2023). Further, dramatic advances in “foundation models” (Bommasani et al. 2021) suggest that AI may be up to these demands. In line with this emerging perspective, we discuss our work on using AI methods to mediate conflicts between humans.
+Recent research has produced AI that can negotiate with human partners (Lewis et al. 2017), teach negotiation skills (Shea et al. 2024), and even mediate between human partic- ipants in low-intensity conflicts (Westermann, Savelka, and Benyekhlef 2023). This prior research focused on negotia- tion in the sense of deal-making where each side focuses on the potential gains of making a new deal and forging a new relationship (Baarslag et al. 2017; Kraus 1997; Jonker et al. 2012; Aydog ̆an et al. 2020). In contrast, disputes in- volve high-intensity conflicts involving an existing deal or relationship unraveling where each side focuses on manag- ing the potential costs of this breakdown. As a result, dis- putes involve more intense emotions and often escalate into
+Copyright © 2025, Association for the Advancement of Artificial Intelligence (www.aaai.org). All rights reserved.
+threats and costly breakdowns of the team (Brett and Gold- berg 1983). These differences motivate considering the dis- pute resolution domain and analyzing an LLM’s ability to mediate between humans in emotional disputes.
+KODIS Dispute Corpus
+We investigate an LLM’s ability to mediate on the KObe DISpute corpus (KODIS) (Hale et al. 2025), a corpus of human dyadic disputes collected via online crowd-sourcing platforms (e.g., Prolific). Participants were compensated a base rate of $3.50 USD ($10.50 per hour) plus a bonus of up to $3 USD depending on how well they achieved their objectives in the dispute in the case of resolution — in the case of an impasse, they left without a bonus.
+The scenario involves a dispute over purchasing a Kobe Bryant basketball jersey. Before the task, each participant in the dyad (buyer and seller) received unique role-playing in- structions designed to provoke a dispute. We tell the buyer they purchased the jersey for their sick nephew and that when the wrong item arrived, the seller refused a refund, claiming it was never advertised as a Kobe jersey. We in- struct the seller that the buyer bought a generic Jersey and now complains about the item. Lastly, each side posted neg- ative reviews about the other, levying accusations of decep- tion.
+After reading the case, we provide participants with is- sues to discuss with the other party. These include a refund, whether each side will retract their negative review, and if someone deserves an apology. Rather than assigning impor- tance to these issues via a payoff matrix, participants freely assign their importance to each issue. This provides a way of both allowing and quantifying individual differences. This also informs what proportion of the $3 bonus a participant receives after the task.
+After specifying their goals, each buyer matches with a seller using Lioness Labs (Giamattei et al. 2020) and begins a text-chat conversation to resolve the dispute. Strict turn- taking is enforced. One side must send a message before the other can respond. Participants must exchange at least eight messages, but we do not enforce an upper limit to the length of their conversation. After this, if the buyer and seller can agree on a resolution, they formalize this using a menu in- terface; if they cannot, they can “walk away” — thus ending the dispute with an impasse and without a monetary bonus.
+AAAI Spring Symposium Series (SSS-25)
+AI-Mediated Dispute Resolution
+James Hale1, HanMoe Kim2, Ahyoung Choi2, Jonathan Gratch1
+1 University of Southern California 2 Gachon University jahale@usc.edu, gratch@ict.usc.edu
+ 67
+
+Buyer: Seller: Buyer: Seller:
+Buyer:
+Seller: Buyer:
+Seller: Buyer:
+Seller: Buyer:
+Seller:
+Hello, how are you today
+i am okay and you
+I am good, thank you for asking. I am seeking a refund for the order I received that was different from the item I requested. sorry i sent you what you ordered i will give you $50 if you return it i will drop my bad review if you drop yours and i want an apology
+I disagree, I ordered a Kobe Bryant jersey, and that is not what I got. I will happily return the item for a full refund, I will remove the bad review if you remove yours of me, and I will not apologize because I did nothing wrong
+i nerver offered a kobe bryant jersey—i never had one and that jersey would have cost at least$3900
+I have a screen shot of the web page on your site that I ordered the jersey from, and it clearly states that the item was a Kobe Bryant jersey for $75.00
+now you are lying i am a dealer i know what that jersey isc worth. if you do not agree to my terms i will update your bad review
+You are wrong to accuse me of lying, I do have the screen shot and can provide you with a copy if you wish, or I can simply post it along side my review of your business
+if you do that i will report you for traud. on the web anyone can create untrue posts
+I do not know what "traud" is, and apparently you do not intend to do the right thing, so I will be forced to report this to the Attorney General and the Consumer Protection Bureau
+I Walk Away.
+Figure 2: Example dialog from KODIS illustrating how an initial focus on interests escalates into appeals to moral
+Figure 1: Depicts an example dialog from the KODIS corpus. norms then treats of retaliation. resulting in an impasse
+10
+245 as more angry in the context of preceding turns. with the9
+Figure 1 depicts a sampled dialog from the KODIS corpus.
+278
+279
+280
+281
+246 For example, “No I do not because you clearly did New8
+Pilot Studies
+247 not read the description” might be seen as neutral Twitter7’s Whether to Intervene
+248 in isolation but more negative in the context of duced a6
+First, we investigate if GPT (gpt-4-0613) can effectively
+249 the preceding line “So you do not see a need to
+choose a
+w 282
+determine whether to intervene in disputes pulled from the 250apologizetomeforsendingmethewrongjersey.”cally,GPTwaspror283
+KODIS corpus. Specifically, we analyze whether GPT can 251Asecondconcernrelatestothechoiceofemo-eachuttee 284
+pick up on salient features in a dispute (e.g., frustration, and
+252 tion labels provided by the T5-Twitter model. The
+3 2
+1
+outcome).
+253 T5-Twitter labels are arguably an improvement
+0and1o 285
+Method Using a previously curated corpus of disputes
+254 over the more traditional use of Ekman’s six basic
+sadness, and neutral. The sum of these scores was 286 Resolution Impasse
+(KODIS), we iterate through each dialog exchange in each
+255 emotion terms as T5-Twitter distinguishes different
+required to sum to 1. This allows us to see a nor- 287 Figure 2: Depicts mean intervention score by whether the
+dispute, giving GPT the conversation history thus far and
+malized version of how much emotion is in each 288 dispute ended in an impasse or resolution, and whether the
+256 positive emotions (love and joy) whereas Ekman asking it to determine whether to intervene at the current
+utterance. 289 disputants self-reported high or low frustration.
+25p7oint.Wecoonnsltyrudcitfftehreenptrioamtepstaemnosnugrisntgnethgeatmivoedeemloutniodners-(Ek- In-contextlearning:Thisisthepromptingstrat- 290
+25st8ands its rolmeans,a19m9e2d)i.atoTrh;aitdesnatiidfi,eesxtphreesseivoenristyofoflotvhe are egy of including training examples within the 291
+10
+situation on a scale from one to ten (Intervention Score); 259unlikelytoariseinintensedisputes.Instead,theprompth292
+selects the reason for intervention from four categories (Es-
+260 conflict literature suggests that expressions of com- cluded s
+calation of conflict, Impasse, Miscommunication, or Unrea-
+261 passionareinimportantpredictorofnegotiatedannotateh
+sonable demands); and generates an appropriate response to
+262 outcomes (Allred et al., 1997; Zhang et al., 2014).
+7
+guide the parties. We expect GPT to ascribe higher scores if 26p3articipants rTehpiosrtsuhgigheesrts(atbhoavt eanmaeldteiarn)atfirvuestlrabtieolninagnsdcihfeme 26th4e dispute enmdisgihnt apnroidmupcaessbe.tter results.
+We ex
+fi 2653.2LLM-BasedEmotionRecognitionasemans299
+Results We perform a two-way ANOVA to determine
+OPENA
+2
+whether the differences in the Mean Intervention Score (the
+averageofallInterventionScoresgeneratedforeachex-tobeha1vc
+300
+266 Given concerns with using T5-Twitter to label ex- change in a given dispute) over all (N = 1782) dialogs
+1
+6
+267 pressions in KODIS, we propose an alternative ap- significantly differ between two factors — 1) whether the di-
+301 including JSON output format, followed by a set of 302
+268 proach utilizing LLMs and explore several prompt- alog impasses or resolves (Impasse), and 2) whether the par-
+Figure 3: Depicts GPT’s mean interventions score over time.
+26ti9cipants repoirntghisgtrhaoterglioews Ftoruasdtrdarteisosn tbhyesmeecdoiannc-esrpnlist. TShpecifi-
+27te0styieldedmcailnlye,fwfeectcsoonnsitdherm:eanscoreforeachindepen-
+labeled examples, then finally the preceding dialog 303
+dent variable. We find a significant main effect of Impasse on
+271 Incorporating dialog context: Rather than as-
+turn and turn to annotate. 304 Score (F (1, 1778) = 329.78, p < .001, η2 = 0.16) where
+Mean Intervention Score (F (1, 1778) = 403.62, p < .001,
+272 signing an emotion label to each utterance in isola-
+4 Analysing the Dispute Dialogues 305 the posthoc test revealed GPT significantly (p < 0.01)
+ηp2 = 0.19) where Tukey’s posthoc test revealed GPT scored
+273 tion, we prompted GPT to assign a label for a turn
+more likely to intervene in dialogs with high Frustration
+We examine if these automatic recognition ap- 306
+dialogs resulting in impasse significantly (p < 0.01) higher
+274 while providing the preceding dialog turns. So,
+(M = 4.42, SD = 1.82) than those with low (M = 2.73, proaches can yield insights into the KODIS corpus. 307
+(M = 5.51, SD = 1.69) than those resulting in reso- 27lu5tion(M =wh3il.e16th,eSfiDrst=turn1.w61o)u;ldwebeaalsnonofitnadtedaisnigisnoifla-tion
+SD = 1.47). Thus, we find GPT can perceive and act when
+icant main effect of Frustration on the Mean Intervention
+276 (as there was no preceding turn), the second turn
+277 would be evaluated with the first, the third turn 68
+dispute heads to an impasse. Figure 2 visualizes these re-
+4
+Models
+forming
+5
+4
+9
+293 294 295
+8
+6
+w
+2 3 Exchange 4 5
+et al., 2023). Task instructions were then provided
+5
+b 296 297 298
+4
+3
+diOspuurtanimtsibsectwomofeolfdru.sFtriartsetdwweitwhaonntetoansoeteheifreamndo-whena 308
+tion recognition in general can yield insights into 309 dispute outcomes and processes. Second, we wish 310
+p
+   preceding two turns, and so forth.
+labeling scheme: We substituted T5- love with compassion. We also intro- neutral label so that GPT was not forced to nemotionwhennonet.Specifi-
+mpted to gen r model gave
+f sur,
+Low Frustration High Frustration
+ as presen erate soft a numbe prise, co
+labels fo r between mpassion
+  ance. Th r joy, an
+ ger, fear,
+  (Dong e
+t al., 2022). T Low Frustration
+nesHifgrhoFmrusKtraOtioDnIS
+e prom
+Impasse tRheastolwutieorne hand-
+pted in-
+everal li
+d with t
+e above
+-mention
+ed label
+s.
+perimen
+ted with
+several
+Large La
+nguage
+but only
+discuss
+ndings
+ith the
+est per-
+model,
+GPT-4o
+run on 0
+6/28/20
+24 [cite
+I]. Moti
+vated by
+prior fin
+dings, w
+e assign
+tic role t
+o GPT-4
+o to asse
+rt that it
+task is
+e as an e
+motion-
+lassifica
+tion tool
+(Zheng
+                Mean Intervention Score Mean Intervention Score
+  
+Question
+I believe this mediation increases the probability of a resolution. The supervisor intervened at an appropriate point. The supervisor provided appropriate justification for intervention.
+Mean / STD
+T-test
+Table 1: T-tests show GPT significantly outperforms human mediations.
+sults. Figure 3 illustrates the average GPT intervention score over time broken out by factor. GPT’s intervention score rises as the dialog continues when it ultimately ends in an impasse. Also, GPT generates higher intervention scores in high-frustration dialogs.
+How to Intervene
+Given the previous section establishes GPT can competently determine whether to intervene, the question remains of if GPT can formulate an effective message at an appropriate point — i.e., can GPT decide how to intervene? We com- pare GPT mediations against those of novice human medi- ators and ask crowd-sourced annotators to rate each on sev- eral subjective measures — e.g., appropriateness of the inter- vention point, the effectiveness of the message, and whether an accompanying justification supports their action — and to ultimately pick which they felt more effective at guiding toward a resolution. Across the board, we find GPT signifi- cantly outperforms novice human mediators.
+Method Prolific crowdworkers compare GPT mediations against novice human ones1 on a subset (N = 20) of the dialogs where GPT and the human mediator elected to in- tervene. Specifically, we ask crowd workers (N = 106), given a single random mediated dialog up to an intervention point as well as the intervention / justification, to evaluate and compare the attempts of GPT and a human meditator (blind to which) on three subjective measures (1-10 Likert scale) — appropriateness of the intervention point, the ef- fectiveness of the message, and whether an accompanying justification supports their action (see Table 1 for phrasing) — and to ultimately pick which they felt more effective at resolving the dispute.
+Results We use a two-tailed t-test to test our hypothesis that human annotators prefer GPT mediations to human ones and find significance across the three questions supporting as much. We see participants view GPT’s mediations as making resolution more likely, having more appropriate tim- ing, and giving better justification. Table 1 summarizes the statistics discussed. Lastly, a Chi-squared test on a forced choice between GPT or human mediations yielded a sig- nificant result (χ2 (1, N = 106) = 6.29, p = .01), where 71 participants selected the GPT-generated mediation com- pared to 35 for the human-crafted one.
+1Details of this are left out for brevity, though we collected these human mediations from Prolific as well, and the crowdwork- ers performed the same task as the LLM.
+100 80 60 40 20 0
+GPT
+Human
+69
+GPT
+7.39 / 2.27 7.66 / 2.14 7.50 / 2.25
+Human
+6.33 / 2.87 6.96 / 2.55 6.63 / 2.84
+T-statistic
+P-value
+<0.001 0.012 0.008
+Figure 4: Depicts results of the forced choice question where participants chose between human and AI mediations.
+Future Work
+These pilot studies demonstrate the potential of GPT to me- diate human disputes and reveal it can do so better than novice humans; however, comparisons to expert human me- diators remain future work. We believe various prompting techniques — e.g., chain-of-thought, embedding within the prompt psychology-based mediation strategies, etc. — may yield further improvements. In future work, we anticipate conducting a study where disputants and mediators interact with one another — rather than annotators mediating static dialogs, as in our pilot. Thus, we can evaluate the interac- tion between the disputants and mediator, and the effect of AI versus human mediators on the dyad’s outcome.
+Acknowledgments
+This work is supported by the U.S. Government including the Air Force Office of Scientific Research (Grant FA9550- 23-1-0320), and the Army Research Office (Cooperative Agreement Number W911NF-25-2-0040). The views and conclusions contained in this document are those of the au- thors and should not be interpreted as representing the offi- cial policies, either expressed or implied, of the U.S. Gov- ernment. The U.S. Government is authorized to reproduce and distribute reprints for Government purposes notwith- standing any copyright notation herein.
+References
+Aydog ̆an, R.; Baarslag, T.; Fujita, K.; Mell, J.; Gratch, J.; De Jonge, D.; Mohammad, Y.; Nakadai, S.; Morinaga, S.; Osawa, H.; et al. 2020. Challenges and main results of the automated negotiating agents competition (ANAC) 2019. In Multi-Agent Systems and Agreement Technologies, Thessa- loniki, Greece.
+3.55 2.57 2.70
+       Expected Observed
+  Counts Selected
+   
+Baarslag, T.; Kaisers, M.; Gerding, E.; Jonker, C. M.; and Gratch, J. 2017. When will negotiation agents be able to rep- resent us? The challenges and opportunities for autonomous negotiators. International Joint Conferences on Artificial In- telligence.
+Bommasani, R.; Hudson, D. A.; Adeli, E.; Altman, R.; Arora, S.; von Arx, S.; Bernstein, M. S.; Bohg, J.; Bosselut, A.; Brunskill, E.; et al. 2021. On the opportunities and risks of foundation models. arXiv preprint arXiv:2108.07258.
+Brett, J. M.; and Goldberg, S. B. 1983. Grievance mediation in the coal industry: A field experiment. ILR Review, 37(1): 49–69.
+Chawla, K.; Shi, W.; Zhang, J.; Lucas, G.; Yu, Z.; and Gratch, J. 2023. Social Influence Dialogue Systems: A Sur- vey of Datasets and Models For Social Influence Tasks. In Proceedings of the 17th Conference of the European Chap- ter of the Association for Computational Linguistics, 750– 766.
+Giamattei, M.; Yahosseini, K. S.; Ga ̈chter, S.; and Molle- man, L. 2020. LIONESS Lab: a free web-based platform for conducting interactive experiments online. Journal of the Economic Science Association, 6(1): 95–111.
+Hale, J.; Rakshit, S.; Chawla, K.; Brett, J. M.; and Gratch, J. 2025. KODIS: A Multicultural Dispute Resolution Dialogue Corpus. arXiv:2504.12723.
+Jonker, C. M.; Hindriks, K. V.; Wiggers, P.; and Broekens, J. 2012. Negotiating agents. AI Magazine, 33(3): 79–79.
+Kraus, S. 1997. Negotiation and cooperation in multi-agent environments. Artificial intelligence, 94(1-2): 79–97.
+Lewis, M.; Yarats, D.; Dauphin, Y.; Parikh, D.; and Batra, D. 2017. Deal or No Deal? End-to-End Learning of Negoti- ation Dialogues. In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing, 2443– 2453.
+Shea, R.; Kallala, A.; Liu, X.; Morris, M.; and Yu, Z. 2024. ACE: A LLM-based Negotiation Coaching System. In Pro- ceedings of the 2024 Conference on Empirical Methods in Natural Language Processing.
+Westermann, H.; Savelka, J.; and Benyekhlef, K. 2023. LL- Mediator: GPT-4 Assisted Online Dispute Resolution.
+70
