@@ -1,0 +1,591 @@
+ 
+相关论文：
+这篇论文提出一个由 GPT-4 驱动的调解系统 LLMediator，用于帮助在线解决小额法律纠纷，通过改写发言、生成调解建议等方式提升效率与和解可能性。（LLMediator: GPT-4 Assisted Online Dispute Resolution）
+ 
+这篇文章发现：GPT-4 能像人类一样区分因果性与道德性冲突，具备作为AI调解员的潜力，但在面对道德分歧时常误判为因果分歧，需进一步优化其冲突识别能力。（LLMs as mediators: Can they diagnose conflicts accurately?）
+ 
+这篇文章提出了一个结合心理学理论与大语言模型的互动系统 ConflictLens，旨在通过结构化分析与模拟对话训练，帮助用户理解并改善浪漫关系中的冲突沟通模式。（ConflictLens: LLM-Based Conflict Resolution Training in Romantic Relationship）
+ 
+这篇文章表明：GPT-4 能有效判断何时介入情绪化争端对话，并生成比新手人类调解者更具时机感与说服力的调解语句，显示其在在线冲突调解中的实际潜力。（AI-Mediated Dispute Resolution）
+ 
+这篇文章通过“学习—实践—反思”的教学流程，结合大型语言模型（ChatGPT）模拟冲突对话，验证了该方法能有效提升STEM学生在团队合作中处理冲突的信心与策略运用能力。（Transformative Learning and Conflict Management Training via Large Language Models in Computing Education）
+ 
+这篇文章通过引入基于TKI冲突理论的GPT-4调解者，系统评估不同调解风格在在线极化辩论中对观众说服力、立场转变和共识感知的影响，提出一种可扩展的AI去极化干预机制。（"AI-Driven Mediation Strategies for Audience Depolarisation in Online Debates"）
+ 
+这篇文章提出并迭代设计了群聊 AI 代理 Koala，探索了其在多人头脑风暴中的主动发言策略与行为控制机制，并通过两轮用户研究总结出一套用户可调的交互行为控制框架，证明适度可控的 AI 参与能提升群体协作体验。（Controlling AI Agent Participation in Group Conversations: A Human-Centered Approach）
+ 
+作者提出使用基于“社交取向”理论的标签（如支配、冷漠、亲和等）增强对话建模，证明该特征不仅提升了对话是否会失败的预测准确率，尤其在低资源和多语言场景中效果显著，还提高了模型的可解释性。（Social Orientation Features Improve Dialogue Outcome Prediction）
+ 
+这篇论文通过大规模调查和 Reddit 数据分析，揭示了不同社区在价值观上的显著差异与内部分歧，强调“没有统一标准的好社区”，并探讨了价值观的可预测性与治理挑战。（What Makes Online Communities ‘Better’? Measuring Values, Consensus, and Conflict across Thousands of Subreddits）
+ 
+本文提出“Inner Thoughts”框架，使LLM代理基于内在动机在多人对话中自主决策是否插话，从而实现更自然、人性化的主动参与行为。（Inner Thoughts: Modeling the Intrinsic Motivations of LLM Agents in Multi-Party Conversations）
+ 
+OverlapBot 这篇论文通过微调 Llama3-8B，引入插话标签体系，训练出一个能自然判断何时插话、如何插话、说什么内容的聊天机器人，显著提升了AI在人类对话中的重叠互动能力。（OverlapBot: Enhancing LLMs for Human-Like Overlapping in Conversations）
+ 
+本文提出 Duplex 模型，通过时间切片和打断机制，使语言模型具备“边听边说”的能力，从而实现更类人、非回合式的自然对话体验。（Duplex Models: Towards Non-Turn-Based Dialogue with Language Models）
+ 
+它提出并系统研究了一个重要而少被探讨的问题：在对话仍然“正常”时，预测它是否会“失控”（出现攻击性言论）。（Conversations Gone Awry: Detecting Early Signs of Conversational Failure）
+ 
+这篇论文提出并评估了一种由大语言模型驱动的“AI反对者”系统，旨在通过在多人决策讨论中主动插入反对意见，打破从众效应、提升少数观点表达与决策满意度。（Conversational Agents as Catalysts for Critical Thinking: Challenging Social Influence in Group Decision-making）
+ 
+ 
+ 
+ 
+ 
+相关可能的心理学理论：
+1. 冲突风格模型（Conflict Styles）
+Thomas-Kilmann Conflict Mode Instrument (TKI) Thomas & Kilmann, 1974 👉 将冲突风格分为五种：竞争（Competing）、回避（Avoiding）、迁就（Accommodating）、妥协（Compromising）、合作（Collaborating）。
+在组织心理学、教育、婚姻关系等广泛应用。
+TKI 是现今最常用的冲突风格测评工具之一。
+
+
+2. 人际冲突研究
+Deutsch, M. (1973). The Resolution of Conflict. 👉 奠基性著作，区分了建设性冲突与破坏性冲突，强调合作/竞争框架对冲突演变的影响。
+Jehn, K. A. (1995). "A multimethod examination of the benefits and detriments of intragroup conflict." 👉 区分任务冲突（task conflict）与关系冲突（relationship conflict），指出适度的任务冲突有助于决策质量，而关系冲突会破坏群体效能。
+Rahim, M. A. (1983). 👉 发展了冲突处理的量表（Rahim Organizational Conflict Inventory），进一步细化了冲突风格维度，增强了情境适配性。
+ 
+1. 打断的分类与社会心理效应
+Goldberg, J. A. (1990). "Interrupting the discourse on interruptions." 👉 明确区分协作性打断（cooperative interruption）与竞争性打断（intrusive/competitive interruption），影响听者感知和社会评价。
+Beattie, G. (1981). 👉 研究打断与性别之间的关系（例如在异性对话中男性更倾向于主导打断）。
+2. 打断与认知负荷
+Gillie, T. & Broadbent, D. (1989). "What makes interruptions disruptive? A study of length, similarity, and complexity." 👉 从注意力转移和工作记忆的角度出发，研究打断在认知负荷高任务中的干扰效应。
+ 
+1. 对话与权力（Power in Conversation）
+West, C., & Zimmerman, D. H. (1983). "Small insults: A study of interruptions in cross-sex conversations between unacquainted persons." 👉 将打断作为权力展示的工具，探讨其在冲突中的潜在作用。
+2. 交互冲突管理（Conversational Conflict Management）
+Tannen, D. (1990). You Just Don't Understand: Women and Men in Conversation. 👉 探讨在跨性别交流中，不同的打断方式、语气和对抗性语言会如何导致冲突与误解。
+Schegloff, E. A. (2000). "Overlapping talk and the organization of turn-taking for conversation." 👉 从会话分析角度审视“打断”是否构成“冲突”，与对话转接机制如何互动。
+ 
+ 
+心理学理论总结：
+ 
+The Resolution of Conflict
+（https://www.beyondintractability.org/bksum/deutsch-resolution）
+🌟1. 研究核心问题：冲突是建设性的还是破坏性的？
+Deutsch关注的核心问题是：在什么条件下，冲突会产生建设性（constructive）而不是破坏性（destructive）的后果？
+他并不试图消除冲突，而是研究如何让冲突变得有益。
+
+ 
+🔍2. 冲突走向的七类决定性变量
+决定冲突是走向建设性还是破坏性的因素主要有七类：
+冲突双方的特征（如价值观、目标、资源、信念、权力关系等）
+双方的既往关系（信任、极化程度、期待）
+冲突议题的本质（是否灵活、意义重大等）
+社会环境背景（是否有制度规范、社会支持、干预机制）
+相关旁观者或利益相关者（第三方的态度与影响）
+双方所使用的策略与手段（是否公开、诚实、具有正当性）
+冲突结果对各方的影响（短期/长期收益或损失）
+
+ 
+🧠3. 冲突的类型分类（Typology of Conflict）
+Deutsch提出六种冲突类型（有交集）：
+类型
+解释
+Vertical
+实质性冲突，确实存在且被准确感知
+Contingent
+冲突是由环境变化触发的，可逆
+Displaced
+争论的议题是表象，真实问题被隐藏
+Misattributed
+搞错了冲突对象或议题
+Latent
+应该发生但尚未爆发的冲突
+False
+根本没有冲突，只是误解或误会造成
+
+ 
+
+ 
+⚔️4. 五大冲突议题类型
+对资源的控制
+偏好与干扰
+价值观冲突
+对事实/信息的看法不同
+支配性关系冲突（如谁有更高地位）
+
+ 
+📈5. 破坏性冲突的演化机制
+Deutsch指出破坏性冲突会自动扩展与升级，脱离最初的起因，变成“自我强化的负面循环”。升级过程由三种力量驱动：
+竞争机制（要赢）
+认知偏误（把别人看得更恶，自己看得更善）
+承诺机制（已投入的成本导致难以回头）
+❗破坏性冲突的后果包括：
+沟通变差
+使用威胁、欺骗等手段
+仇视升级
+对妥协方案的合理性感知偏差
+信任比怀疑更难建立
+
+ 
+🕊️6. 建设性冲突的路径与条件
+建设性冲突通常具备：
+双方视冲突为共同问题
+使用合作性问题解决方法
+开放沟通、认可彼此的利益正当性
+鼓励信任与共识形成
+Deutsch引用“社会关系的粗糙法则”：合作引发合作，竞争引发竞争。
+
+ 
+🧱7. 制度性冲突调节方式
+包括：
+社会角色（如调解者、裁判）
+社会规范（如公平、非暴力）
+谈判流程制度化（如议题设置、谈判顺序）
+正当程序与透明沟通
+
+ 
+🧩8. 第三方的作用：既可能有害，也可能是促成者
+有效第三方应具备：
+中立、可信、熟练、低调
+能帮助理清议题、改善沟通、建议解决方案、增加协议的吸引力
+也可能因“外人插手”而遭两方抵触
+
+ 
+🧨9. 低权力群体的策略建议
+Deutsch特别强调：弱势群体并非只能被动接受命运，而是可以通过如下方式增强影响力：
+明确表达诉求
+表达对高权方所承受压力的理解
+提供合作意愿
+清楚表达对抗后果
+显示决心与动员力
+弱势群体的资源包括：
+人数多、组织好、内部团结
+拥有道义正当性
+能通过非暴力策略（如“政治柔道”）施压高权方
+
+ 
+🧭总结句：
+冲突不可避免，关键在于设计机制和培育环境，使之变为建设性推动力，而非破坏性消耗战。
+ 
+Interrupting the Discourse on Interruptions
+https://www.sciencedirect.com/science/article/abs/pii/037821669090045F
+ 
+🧠 一句话总结
+不是所有的“打断”都是为了争权夺势：Julia A. Goldberg 提出，打断行为应根据其关系意义被划分为三类——中性、权力导向、亲密导向（rapport-oriented），而非一律解读为权力压制。
+
+ 
+📌 研究动机
+传统观点将打断视为 显示支配、控制和不尊重对话者的行为。但 Goldberg 认为这种简化不符合实际交流的复杂性，忽略了打断行为的 情境、内容与交互关系。
+她指出，在现实交流中：
+有些打断确实是权力/控制；
+有些是出于积极的互动意愿（如亲密、合作）；
+有些是因对话职责所需、非主观意图（如主持人控制时间）；
+同一类打断在不同语境中可能意义完全不同。
+
+ 
+🧱 核心结构与分类框架
+Goldberg 提出一种 三分法+双维度分析法 来识别打断行为的关系属性：
+🧩 三类打断行为
+类别
+特征
+举例
+✅ 中性型（Neutral）
+出于职责或语境需要，不含强烈情感或意图，不构成关系挑战
+澄清、修正、对突发情况反应（如孩子打闹）
+🔺 权力型（Power-oriented）
+忽视对方说话权利，强行夺取话语权，通常改变话题或方向，常被视为不礼貌
+突然打断并强行转话题、插入与内容无关的观点
+❤️ 亲密型（Rapport-oriented）
+保持话题一致，补充、呼应、表达关心，是积极合作行为
+共同讲故事、帮忙补全信息、鼓励式反馈
+
+ 
+👇 她进一步指出，中性打断主要出于“参与义务”，权力与亲密打断主要出于“个人愿望”。
+
+ 
+🛠️ 操作性判断标准（Heuristic）
+她提供了一个分类判断准则，主要依据以下几个维度：
+维度
+权力型打断
+亲密型打断
+话题连贯性（coherence）
+弱 / 中断主题
+强 / 紧跟当前内容
+是否允许说话人回到原话题
+否
+是
+是否考虑对方“面子”（face wants）
+忽略，常构成威胁
+通常考虑，可能增强正面印象
+动机焦点
+自我优先
+他人/共同目标优先
+情感语调
+抢话、攻击、轻蔑
+热情、鼓励、支持
+转接方式
+常为“重新引入话题”型（re-introducing move）
+多为“继续推进”或“辅助推进”型（holding/progressive move）
+
+ 
+她还提供了如 Figure 1 和 Figure 2 等图示，对中断行为的功能与语言形式进行分类。
+
+ 
+🎭 现实意义与研究贡献
+反对将打断视为权力唯一象征：
+强调内容、语气、场景与角色影响更大；
+同一打断行为可能被不同人解读为权力或亲密。
+
+
+引入“互动权责”与“面子需求”分析：
+展示说话人与倾听者在互动中面临的平衡压力；
+理解打断是交互冲突的自然产物。
+
+
+赋予“打断”更多正面含义：
+比如展示兴趣、协助表达、参与情绪共鸣等。
+
+
+
+ 
+A multimethod examination of the benefits and detriments of intragroup conflict
+https://www.jstor.org/stable/2393638
+ 
+🧩 一句话总结
+冲突不是一概有害或有益，关键在于冲突类型、任务特性、任务依赖性和群体规范是否“匹配”。
+
+ 
+📌 研究核心问题
+冲突到底是“毒药”还是“良药”？
+Jehn 提出的问题是：不同类型的群体冲突是否有不同的效应？它们在什么情况下有利于工作绩效，什么情况下反而破坏群体合作？
+
+ 
+🔍 冲突类型区分
+类型
+定义
+影响
+Relationship Conflict（关系冲突）
+因人格、情绪、喜恶等引起的对立
+几乎总是有害：降低满意度、喜欢程度和留在团队的意愿
+Task Conflict（任务冲突）
+对任务内容、策略的分歧
+视情境而定：对复杂任务有益，对常规任务有害
+
+ 
+
+ 
+🧪 实验设计与方法
+样本：105个工作组（包括管理团队与基层团队），共589人
+方法：
+量化数据：问卷（Likert量表）、组织绩效数据
+质性数据：观察笔记 + 深度访谈（165次）
+
+
+变量：
+自变量：关系冲突、任务冲突
+调节变量：任务类型（routine vs. nonroutine）、任务依赖度、冲突规范
+因变量：个人与群体绩效、满意度、群体成员之间的好感、留任意愿
+
+
+
+ 
+🧠 主要发现与结论
+1. 关系冲突几乎总是负面
+会显著降低个体对团队的满意度、对同事的好感和继续留下的意愿。
+对工作绩效影响不显著，但带来情绪消耗与人际冷漠。
+2. 任务冲突在合适情境下有益
+**非例行任务（nonroutine）**中：
+适度的任务冲突提升绩效 → 刺激批判性思维、避免群体思维（groupthink）。
+过高或过低的冲突都不利，呈现倒U型关系。
+
+
+**例行任务（routine）**中：
+冲突会干扰标准流程与效率，适得其反。
+少量冲突可促进流程优化，但一旦过多，则迅速走向负面。
+
+
+3. 冲突规范的影响是双刃剑
+鼓励开放讨论：
+对任务冲突有积极影响（提高讨论深度与创造力）。
+但在关系冲突场景下反而恶化局势（冲突升级，情绪爆炸）。
+
+
+回避型规范在处理关系冲突时更有效（减少敌意，保持表面和气）。
+4. 任务依赖性放大冲突效应
+高依赖度时，关系冲突更具破坏性，任务冲突更具建设性。
+
+ 
+📈 实证结果支持的关键假设总结
+假设编号
+内容
+是否支持
+H1
+关系冲突降低满意度、好感、留任意愿
+✅
+H2a/H2b
+关系冲突降低个体/团队绩效
+❌
+H3
+任务冲突降低满意度等
+✅（部分支持）
+H4（非例行任务）
+任务冲突与绩效呈倒U型
+✅
+H5（例行任务）
+任务冲突与绩效呈倒U型
+✅
+H6（任务依赖）
+冲突效应因依赖性增强
+✅（部分）
+H7（冲突规范）
+开放规范增加积极效应，减少负面效应
+✅（对任务冲突），❌（对关系冲突）
+
+ 
+
+ 
+🔧 研究意义
+这项研究首次整合了冲突类型 × 任务性质 × 群体规范三者的交互作用，提出了一个更为细致、情境化的冲突效应模型。对组织管理有重要启示：
+不要一味追求“零冲突”，有策略地引导任务冲突才是关键。
+关系冲突应当被预防与隔离，尤其在高依赖任务中。
+“鼓励表达”的规范要谨慎使用，需与任务类型与成员能力匹配。
+ 
+ 
+Rahim Organizational Conflict Inventory
+（https://www.semisrc.org/uploads/9/5/4/7/9547971/rocii_conflict_questionnaire__2_.pdf）
+ 
+你提到的这份问卷叫做 Rahim Organizational Conflict Inventory–II（ROCI-II），是一个经典的冲突处理风格测量工具，用于评估个体在面对职场冲突（与上级、下属、同事）时所采用的策略。下面我将系统地解释其结构、五种冲突处理风格的含义以及如何使用评分方式来分析一个人的冲突应对倾向。
+
+ 
+🧩 一、问卷结构说明
+ROCI-II 有三个不同版本：
+Form A：与上级冲突
+Form B：与下属冲突
+Form C：与同事冲突
+每份问卷有 28道题目，每题都是一个关于你在冲突中的行为方式的陈述，比如：
+“我试图与对方一起调查问题，以找到一个我们都能接受的解决方案。”
+回答方式为 1 到 5 分的李克特量表：
+1 = 强烈不同意（Strongly Disagree）
+5 = 强烈同意（Strongly Agree）
+
+ 
+🎭 二、五种冲突处理风格解释（Rahim's 5 Styles）
+ROCI-II 基于 两维度模型：
+关注自我利益（Concern for Self）
+关注他人利益（Concern for Others）
+结合这两个维度，形成了以下五种风格：
+风格名
+特征
+行为描述
+常见策略关键词
+1. 协作型（Collaborating）
+高自我 + 高他人
+双方共同解决冲突，追求“双赢”
+协同解决、共同决策、信息共享
+2. 迁就型（Accommodating）
+低自我 + 高他人
+自我退让、满足对方需求
+放弃立场、满足对方
+3. 竞争型（Competing）
+高自我 + 低他人
+强势维护自身利益
+使用权力、施加影响
+4. 回避型（Avoiding）
+低自我 + 低他人
+逃避冲突、不正面应对
+推迟、保持距离、沉默
+5. 妥协型（Compromising）
+中等
+双方都让步，达成中间方案
+让步、讨价还价、折中解决
+
+
+ 
+📊 三、评分方式
+你需要将每类风格下对应题目的得分求平均。比如：
+协作型（Collaborating Style）对应题目：
+第 1、4、5、12、22、23、28 题 → 总分 / 7 = 协作平均得分
+各风格所对应的题目编号如下：
+风格
+题目编号
+协作型
+1, 4, 5, 12, 22, 23, 28
+迁就型
+2, 10, 11, 13, 19, 24
+竞争型
+8, 9, 18, 21, 25
+回避型
+3, 6, 16, 17, 26, 27
+妥协型
+7, 14, 15, 20
+
+你可将这些题目的得分相加再除以题目数（5–7不等），得到每种风格的平均分，分数越高，说明你越倾向使用该种处理风格。
+
+ 
+🧠 四、使用场景与解读建议
+用途：
+个人自评：了解自己在面对不同对象（上司/下属/同僚）时是否采用不同的冲突处理风格；
+领导力培训/组织诊断：分析组织成员之间的冲突互动模式，是否存在权力压制或压抑沟通；
+人际行为研究：探索人格、情绪、组织文化与冲突处理倾向之间的关系。
+解读建议：
+协作型分数高：通常表现为开放沟通、积极解决问题，是最被推荐的冲突方式，特别适用于长期合作的关系；
+竞争型分数高：可能反映主导性强或权力导向，在有明确资源争夺时会常见；
+回避型分数高：可能反映压抑、自我保护，但长期可能导致冲突激化；
+迁就型分数高：适用于关系维系优先的场合，但需警惕自我牺牲过度；
+妥协型分数高：适用于快速达成解决方案，但可能牺牲最佳方案的可能。
+
+ 
+📌 总结一句话
+ROCI-II 是一个用于评估个人在组织中处理冲突（与上司、下属、同僚）时所偏好的五种策略倾向的心理测量工具，有助于理解自身和团队成员的冲突风格与应对模式。
+如你需要我帮你设计电子版表格、数据自动化评分工具，或者将结果与性格测评（如MBTI、Big Five）结合分析，也可以继续告诉我。
+ 
+ 
+Overlapping talk and the organization of turn-taking for conversation
+（https://www.cambridge.org/core/journals/language-in-society/article/overlapping-talk-and-the-organization-of-turntaking-for-conversation/D12AD4181BEEFB073869BE7C55B07660）
+ 
+这篇文章是 Emanuel A. Schegloff 在 2000 年发表于 Language in Society 的论文，题为 《Overlapping Talk and the Organization of Turn-Taking for Conversation》。它是对“多人同时说话”这一现象的深度会话分析研究，以下是对该文的结构化解释：
+
+ 
+🧭 研究核心问题
+问题： 在自然对话中，当多于一人同时发言（即“overlap”）时，参与者如何感知、应对并“解决”这种冲突？
+目标： 提出并分析一种“overlap resolution device”（重叠语的管理机制），这是会话轮替系统（turn-taking system）中的关键组成部分。
+
+ 
+📚 背景理论
+正常的会话轮替系统是 “one speaker at a time”（一次一个人说话）；
+然而，在实际互动中，“同时说话”是不可避免的偏离（另一种偏离是沉默）；
+Schegloff 建基于他与 Sacks 和 Jefferson 的经典工作（Sacks, Schegloff & Jefferson, 1974），在此基础上提出对“overlap”更详细的机制解析。
+
+ 
+🔍 主要内容与理论贡献
+1. 重叠语的分类与界定
+Schegloff 区分了几类非问题性重叠，如：
+Terminal overlap：一人即将说完，另一人预测结尾提早进入；
+Continuers：如“嗯嗯”、“对对”，并不争夺话语权；
+Conditional access：如一人请求帮助完成句子，合作式地插话；
+Choral talk：如群体笑声、问候、祝贺等“合声式”语段。
+这些不被视为“需要解决”的overlap，不属于本研究的重点。
+
+ 
+2. 问题性重叠的解决机制（Overlap Resolution Device）
+Schegloff 提出一个**“overlap resolution device”**，包括以下内容：
+a. 资源（Resources）
+指发话者在面对重叠时可以使用的手段，如：
+音量升高
+节奏加快或减慢
+打断（cut-off）、重述（repetition）
+音节延长（stretching）
+这些被视为在语言行为中“争夺话语权”的战略性行为。
+b. 阶段（Phases）
+他指出重叠具有时间发展阶段：
+Pre-onset（重叠前）：察觉他人即将发言，抢先发力；
+Onset（开始）：两人几乎同时说；
+Post-onset（之后）：是否继续说、放弃、还是加剧冲突；
+Pre-resolution：判断对方是否即将结束，是否可以“撑过去”；
+Post-resolution：处理“自己仍在高声说话”但对方已沉默的尴尬。
+c. 交互逻辑（Interactional Logic）
+重叠语发展如“回合制博弈”：每一个音节或句段（beat）都是一方观察对方并作出响应的时刻：
+是放弃（cut off）？
+是升级（更响、更快）？
+还是继续“平稳输出”？
+这种互动模式可以被看作一种“竞争性轮替博弈”。
+
+ 
+🧪 实证例子
+作者大量使用真实会话片段（如家庭讨论、商店对话）来说明不同配置的overlap，如：
+A→B, B→C：A说B，B转头说C；
+A→B, C→B：两人争夺B的注意；
+A↔B：两人正面对话时重叠，是最常见的形式。
+
+ 
+🧩 文章的贡献与启发
+提出了 overlap resolution 是 turn-taking system 的一个隐含但关键部分；
+强调了重叠行为并非总等于“打断”，应基于参与者的实践来理解；
+揭示了人类会话中复杂的微观调节机制，对构建自然语言对话系统、社交机器人、打断式 AI 插话行为具有启发性；
+引入了**“会话阶段化”**思维，丰富了话语分析与交互策略模型。
+
+ 
+📌 总结一句话
+这篇论文系统分析了自然对话中多方同时说话（overlapping talk）时的组织与应对机制，揭示了人类会话中高度协调与博弈的轮替结构，是会话分析与交互行为研究的经典文献
+ 
+Overview of Conflict and Conflict Management
+这篇《Overview of Conflict and Conflict Management》是 Kenneth Thomas 在 1992 年对其1976年开创性章节的回顾总结，发表于 Journal of Organizational Behavior。文章简明扼要地回顾了 Thomas 在冲突研究中的核心贡献，尤其是他提出的两个关键模型：过程模型（Process Model）和结构模型（Structural Model），这两个模型构成了冲突管理领域的理论基石。以下是对文章内容的结构化解释：
+
+ 
+🔹 一、背景与意义
+Thomas 的1976年章节在组织行为和冲突研究中具有里程碑意义。当时学界一方面在理论上对冲突有了较多发展，另一方面社会和实践界也强烈呼吁能“有效管理冲突”。这两种需求——描述性理解与规范性管理——在他的工作中融合。
+
+ 
+🔹 二、冲突的定义与后果
+Thomas 首先尝试给出一个**简洁明晰（parsimonious）**的冲突定义，并简要讨论了冲突的正面与负面后果：
+正面如激发创新、澄清目标；
+负面如破坏关系、降低效率。
+
+ 
+🔹 三、两个模型介绍
+🧩 1. 过程模型（Process Model）
+用于描述具体冲突事件的内部动态，特别是一对一（dyadic）冲突。模型分五个阶段：
+挫折感（Frustration） 一方认为自己的目标/需求被对方阻碍。
+
+
+概念化（Conceptualization） 双方开始定义冲突的性质、关切点和可能的解决结果。
+
+
+行为（Behavior） 各自采取的冲突处理方式、目标、战术等。
+
+
+互动（Interaction） 行为相互作用的序列，可能导致冲突升级或降温。
+
+
+结果（Outcomes） 冲突的短期结果与长期后果。
+
+
+Thomas 还简要提到第三方干预（如调解）可以介入过程，改变冲突轨迹。
+
+Thomas’s Conflict Process Model (1992)
+冲突通常经历 5 个阶段：挫败感 → 感知冲突 → 意图形成 → 行为 → 结果。
+调解或打断的“最佳时机”常常在意图与行为之间，即情绪开始上升但尚未完全破裂前。
+ 
+ 
+🧩 2. 结构模型（Structural Model）
+用于解释跨事件反复出现的冲突模式，强调冲突产生的背景结构因素：
+个体倾向（Predispositions） 类似“冲突人格”或主导风格（dominant style）。
+
+
+社会压力（Social Pressures） 比如来自组织、同侪、上级的期待与规范。
+
+
+激励结构（Incentive Structure） 包括双方目标的一致性/冲突程度、利益大小，组织是否奖励合作或竞争行为。
+
+
+规则与程序（Rules and Procedures） 是否有正式协商机制、裁决制度、第三方机制等。
+
+
+
+ 
+🔹 四、应用与未来方向
+Thomas 在结尾提出一系列诊断性问题（diagnostic questions），帮助读者将这两个模型用于实际案例分析，并给出了对冲突管理领域现状的总结及未来研究建议。
+ 
+ 
+ 
+相关量表
+A Measure of Perceived Argument Strength: Reliability and Validity
+（PAS，感知论点强度）
+本文开发并验证了一种比传统“思维列举”更实用的封闭式问卷，用以衡量人们对说服性信息的感知强度，并在青少年反毒、成人戒烟等健康传播情境中验证了其可靠性、效度与实用性。
+https://pmc.ncbi.nlm.nih.gov/articles/PMC4283835/
+维度
+说明
+可信度
+该论点是否令人信服
+重要性
+是否对自己具有实际意义
+说服力
+是否有说服力（第二项，正向措辞后被保留）
+激发思维
+是否激起正向或负向思维（两项减法得分表示认知反应）
+自信提升
+是否增强对改变行为的信心（如不吸烟、拒绝大麻）
+他人影响
+该论点是否有助于朋友也做出同样改变
+同意程度
+是否同意该论点
+理由强度评估
+你认为这是一条强或弱的理由（整体印象）
+
+ 
+Perceived Likelihood of Consensus
+ 
+Psychological Safety Scal
+ 
+
