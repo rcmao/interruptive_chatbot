@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房间调试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: red;
+            background: #ffe6e6;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            color: green;
+            background: #e6ffe6;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #e6f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>房间调试页面</h1>
+    
+    <div class="debug-section">
+        <h2>1. 检查登录状态</h2>
+        <button class="button" onclick="checkLoginStatus()">检查登录状态</button>
+        <div id="loginStatus"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>2. 测试登录</h2>
+        <input type="text" id="username" placeholder="用户名" value="testuser">
+        <input type="password" id="password" placeholder="密码" value="testpass123">
+        <button class="button" onclick="testLogin()">测试登录</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>3. 获取房间列表</h2>
+        <button class="button" onclick="getRooms()">获取房间列表</button>
+        <div id="roomsResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>4. 测试加入房间</h2>
+        <input type="number" id="roomId" placeholder="房间ID" value="1">
+        <button class="button" onclick="testJoinRoom()">测试加入房间</button>
+        <div id="joinResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>5. 跳转到聊天页面</h2>
+        <button class="button" onclick="goToChat()">跳转到聊天页面</button>
+        <div id="chatResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>6. 调试信息</h2>
+        <button class="button" onclick="showDebugInfo()">显示调试信息</button>
+        <div id="debugInfo"></div>
+    </div>
+
+    <script>
+        const baseUrl = 'http://localhost:8080';
+        
+        function showMessage(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+        
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                showMessage('loginStatus', `✅ 已登录，Token: ${token.substring(0, 20)}...`, 'success');
+            } else {
+                showMessage('loginStatus', '❌ 未登录，没有找到token', 'error');
+            }
+        }
+        
+        async function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    showMessage('loginResult', `✅ 登录成功！用户: ${data.user.username}`, 'success');
+                } else {
+                    showMessage('loginResult', `❌ 登录失败: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage('loginResult', `❌ 网络错误: ${error.message}`, 'error');
+            }
+        }
+        
+        async function getRooms() {
+            try {
+                const response = await fetch(`${baseUrl}/api/rooms`);
+                const rooms = await response.json();
+                
+                if (response.ok) {
+                    let html = `<div class="success">✅ 获取房间列表成功，共 ${rooms.length} 个房间:</div>`;
+                    rooms.forEach(room => {
+                        html += `<div class="info">房间ID: ${room.id}, 名称: ${room.name}, 成员: ${room.member_count}/${room.max_members}</div>`;
+                    });
+                    document.getElementById('roomsResult').innerHTML = html;
+                } else {
+                    showMessage('roomsResult', `❌ 获取房间列表失败: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                showMessage('roomsResult', `❌ 网络错误: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testJoinRoom() {
+            const roomId = document.getElementById('roomId').value;
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                showMessage('joinResult', '❌ 请先登录', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/rooms/${roomId}/join`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('joinResult', `✅ 加入房间成功: ${data.message}`, 'success');
+                } else {
+                    showMessage('joinResult', `❌ 加入房间失败: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage('joinResult', `❌ 网络错误: ${error.message}`, 'error');
+            }
+        }
+        
+        function goToChat() {
+            const roomId = document.getElementById('roomId').value;
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                showMessage('chatResult', '❌ 请先登录', 'error');
+                return;
+            }
+            
+            if (!roomId) {
+                showMessage('chatResult', '❌ 请输入房间ID', 'error');
+                return;
+            }
+            
+            showMessage('chatResult', `🔄 正在跳转到聊天页面: /chat/${roomId}`, 'info');
+            setTimeout(() => {
+                window.location.href = `/chat/${roomId}`;
+            }, 1000);
+        }
+        
+        function showDebugInfo() {
+            const token = localStorage.getItem('token');
+            const debugInfo = {
+                token: token ? `${token.substring(0, 20)}...` : 'null',
+                userAgent: navigator.userAgent,
+                currentUrl: window.location.href,
+                timestamp: new Date().toISOString()
+            };
+            
+            document.getElementById('debugInfo').innerHTML = `
+                <div class="info">
+                    <h3>调试信息:</h3>
+                    <pre>${JSON.stringify(debugInfo, null, 2)}</pre>
+                </div>
+            `;
+        }
+        
+        // 页面加载时自动检查登录状态
+        window.onload = function() {
+            checkLoginStatus();
+        };
+    </script>
+</body>
+</html> 

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKI状态指示器测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #36393f;
+            color: #dcddde;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: #2f3136;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #40444b;
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+        
+        /* 普通用户TKI状态指示器样式 */
+        .tki-status-indicator {
+            display: flex !important;
+            align-items: center;
+            gap: 6px;
+            margin-left: 16px;
+            padding: 6px 10px;
+            background: #2f3136;
+            border-radius: 6px;
+            border: 1px solid #40444b;
+            font-size: 12px;
+            min-width: 80px;
+        }
+        
+        .tki-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #5865f2; /* 默认协作型蓝色 */
+            flex-shrink: 0;
+        }
+        
+        .tki-status-text {
+            color: #dcddde;
+            font-weight: 500;
+        }
+        
+        /* 普通用户TKI风格颜色 */
+        .tki-status-none .tki-status-dot { background: #747f8d; } /* 灰色 */
+        .tki-status-collaborating .tki-status-dot { background: #5865f2; } /* 蓝色 */
+        .tki-status-accommodating .tki-status-dot { background: #57f287; } /* 绿色 */
+        .tki-status-competing .tki-status-dot { background: #ed4245; } /* 红色 */
+        .tki-status-compromising .tki-status-dot { background: #faa61a; } /* 橙色 */
+        .tki-status-avoiding .tki-status-dot { background: #eb459e; } /* 粉色 */
+        
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .test-btn {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .test-btn:hover {
+            background: #4752c4;
+        }
+        
+        .status-info {
+            background: #40444b;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎨 TKI状态指示器测试</h1>
+        
+        <div class="test-section">
+            <div class="test-title">普通用户TKI状态指示器</div>
+            <div class="test-controls">
+                <button class="test-btn" onclick="changeTKIStatus('none')">无插话</button>
+                <button class="test-btn" onclick="changeTKIStatus('collaborating')">协作型</button>
+                <button class="test-btn" onclick="changeTKIStatus('accommodating')">迁就型</button>
+                <button class="test-btn" onclick="changeTKIStatus('competing')">竞争型</button>
+                <button class="test-btn" onclick="changeTKIStatus('compromising')">妥协型</button>
+                <button class="test-btn" onclick="changeTKIStatus('avoiding')">回避型</button>
+            </div>
+            
+            <!-- 普通用户TKI风格指示器 -->
+            <div class="tki-status-indicator" id="tkiStatusIndicator">
+                <div class="tki-status-dot" id="tkiStatusDot"></div>
+                <span class="tki-status-text" id="tkiStatusText">协作型</span>
+            </div>
+            
+            <div class="status-info" id="statusInfo">
+                当前状态: 协作型 (蓝色)
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">颜色映射说明</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #747f8d;"></div>
+                    <span>无插话 - 灰色</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #5865f2;"></div>
+                    <span>协作型 - 蓝色</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #57f287;"></div>
+                    <span>迁就型 - 绿色</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #ed4245;"></div>
+                    <span>竞争型 - 红色</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #faa61a;"></div>
+                    <span>妥协型 - 橙色</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #eb459e;"></div>
+                    <span>回避型 - 粉色</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const styleDisplayNames = {
+            'none': '无插话',
+            'collaborating': '协作型',
+            'accommodating': '迁就型',
+            'competing': '竞争型',
+            'compromising': '妥协型',
+            'avoiding': '回避型'
+        };
+        
+        const styleDescriptions = {
+            'none': '无插话 - AI不会进行任何干预',
+            'collaborating': '协作型 - 整合各方观点，推动共识',
+            'accommodating': '迁就型 - 优先维护和谐，用温和语气',
+            'competing': '竞争型 - 强势捍卫女性表达权',
+            'compromising': '妥协型 - 设置公平讨论机制',
+            'avoiding': '回避型 - 岔开矛盾话题'
+        };
+        
+        function changeTKIStatus(style) {
+            const statusIndicatorEl = document.getElementById('tkiStatusIndicator');
+            const statusTextEl = document.getElementById('tkiStatusText');
+            const statusInfoEl = document.getElementById('statusInfo');
+            
+            if (statusIndicatorEl && statusTextEl) {
+                // 移除所有风格类
+                statusIndicatorEl.classList.remove('tki-status-none', 'tki-status-collaborating', 'tki-status-accommodating', 
+                                               'tki-status-competing', 'tki-status-compromising', 'tki-status-avoiding');
+                // 添加当前风格类
+                statusIndicatorEl.classList.add(`tki-status-${style}`);
+                // 更新文本
+                statusTextEl.textContent = styleDisplayNames[style] || '未知风格';
+                
+                // 更新状态信息
+                statusInfoEl.textContent = `当前状态: ${styleDisplayNames[style]} - ${styleDescriptions[style]}`;
+                
+                console.log(`TKI状态已更改为: ${styleDisplayNames[style]}`);
+            }
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            changeTKIStatus('collaborating');
+        };
+    </script>
+</body>
+</html> 

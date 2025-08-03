@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天房间</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #36393f;
+            color: #dcddde;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 240px;
+            background: #2f3136;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #202225;
+            position: relative;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            background: #292b2f;
+            border-bottom: 1px solid #202225;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .room-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .room-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .room-description {
+            font-size: 12px;
+            color: #96989d;
+            margin-top: 4px;
+        }
+
+        .sidebar-nav {
+            padding: 8px;
+        }
+
+        .nav-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #96989d;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: #40444b;
+            color: #dcddde;
+        }
+
+        .nav-item.active {
+            background: #5865f2;
+            color: white;
+        }
+
+        /* 主聊天区域 */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #36393f;
+            position: relative;
+        }
+
+        .chat-header {
+            padding: 16px 20px;
+            background: #36393f;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .channel-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .channel-hash {
+            color: #96989d;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .channel-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .channel-description {
+            font-size: 12px;
+            color: #96989d;
+            margin-left: 8px;
+        }
+
+        .chat-header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            color: #96989d;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .header-icon:hover {
+            color: #dcddde;
+            background: #40444b;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: #40444b;
+            border-radius: 4px;
+            padding: 6px 12px;
+            gap: 8px;
+            min-width: 200px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: #dcddde;
+            font-size: 14px;
+            outline: none;
+            width: 100%;
+        }
+
+        .search-bar input::placeholder {
+            color: #96989d;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .message:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .message-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: #dcddde;
+            font-size: 15px;
+        }
+
+        .message-timestamp {
+            font-size: 12px;
+            color: #72767d;
+            font-weight: 400;
+        }
+
+        .message-text {
+            color: #dcddde;
+            line-height: 1.5;
+            font-size: 15px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .intervention-message {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 4px;
+        }
+
+        .intervention-message .strategy {
+            font-weight: 600;
+            color: #ffc107;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .chat-input {
+            padding: 16px;
+            background: #36393f;
+            border-top: 1px solid #202225;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: flex-end;
+            background: #40444b;
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+            gap: 8px;
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .input-action-btn {
+            color: #96989d;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .input-action-btn:hover {
+            color: #dcddde;
+            background: #4f545c;
+        }
+
+        .input-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .message-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #dcddde;
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 120px;
+            outline: none;
+            margin: 0 8px;
+        }
+
+        .message-input::placeholder {
+            color: #72767d;
+        }
+
+        .send-button {
+            background: #5865f2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .send-button:hover {
+            background: #4752c4;
+        }
+
+        .send-button:disabled {
+            background: #40444b;
+            cursor: not-allowed;
+        }
+
+        /* 当前用户信息样式 */
+        .current-user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: #2f3136;
+            border-radius: 4px;
+            border: 1px solid #202225;
+            min-width: 120px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .current-user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .current-user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .current-user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .current-user-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #dcddde;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        .current-user-status {
+            font-size: 11px;
+            color: #43b581;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        /* 统计面板 */
+        .stats-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #2f3136;
+            border-radius: 8px;
+            padding: 16px;
+            width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .stats-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #dcddde;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .stats-label {
+            color: #96989d;
+        }
+
+        .stats-value {
+            color: #dcddde;
+            font-weight: 500;
+        }
+
+        /* 用户列表 */
+        .users-panel {
+            width: 240px;
+            background: #2f3136;
+            border-left: 1px solid #202225;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .users-header {
+            padding: 16px 20px;
+            background: #292b2f;
+            border-bottom: 1px solid #202225;
+            font-weight: 600;
+            color: #dcddde;
+            font-size: 14px;
+        }
+
+        .users-header .online-count {
+            color: #96989d;
+            font-size: 12px;
+            margin-top: 4px;
+            font-weight: normal;
+        }
+
+        .user-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            color: #dcddde;
+            border-bottom: 1px solid #23272a;
+        }
+
+        .user-item:hover {
+            background: #40444b;
+        }
+
+        /* 在线用户样式 */
+        .user-item.online {
+            opacity: 1;
+        }
+
+        .user-item.online .user-avatar {
+            filter: none;
+        }
+
+        .user-item.online .user-name {
+            color: #dcddde;
+        }
+
+        .user-item.online .user-status {
+            color: #43b581;
+        }
+
+        /* 离线用户灰度效果 */
+        .user-item.offline {
+            opacity: 0.6;
+        }
+
+        .user-item.offline .user-avatar {
+            filter: grayscale(100%);
+        }
+
+        .user-item.offline .user-name {
+            color: #96989d;
+        }
+
+        .user-item.offline .user-status {
+            color: #747f8d;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            position: relative;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .user-tooltip.show {
+            opacity: 1;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: #96989d;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            border: 2px solid #2f3136;
+        }
+
+        .status-indicator.online {
+            background: #43b581;
+        }
+
+        .status-indicator.offline {
+            background: #747f8d;
+        }
+
+        .status-indicator.idle {
+            background: #faa61a;
+        }
+
+        .status-indicator.dnd {
+            background: #f04747;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .users-panel {
+                width: 200px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .users-panel {
+                width: 180px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
+
+        /* 侧边栏用户信息样式 */
+        .sidebar-user-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #292b2f;
+            border-top: 1px solid #202225;
+        }
+
+        .sidebar-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .sidebar-user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sidebar-user-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #dcddde;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        .sidebar-user-status {
+            font-size: 12px;
+            color: #43b581;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+        
+        /* TKI控制面板样式 */
+        .tki-control-panel {
+            margin-top: 16px;
+            padding: 16px;
+            background: #292b2f;
+            border-radius: 8px;
+            border: 1px solid #40444b;
+        }
+        
+        .tki-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #dcddde;
+            font-size: 14px;
+        }
+        
+        .tki-panel-header i {
+            color: #5865f2;
+        }
+        
+        .tki-panel-content {
+            font-size: 12px;
+        }
+        
+        .tki-style-selector {
+            margin-bottom: 12px;
+        }
+        
+        .tki-style-selector label {
+            display: block;
+            margin-bottom: 6px;
+            color: #96989d;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .tki-style-selector select {
+            width: 100%;
+            padding: 6px 8px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 4px;
+            color: #dcddde;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .tki-style-selector select:focus {
+            outline: none;
+            border-color: #5865f2;
+        }
+        
+        .tki-style-description {
+            color: #96989d;
+            font-size: 11px;
+            line-height: 1.4;
+            padding: 8px;
+            background: #2f3136;
+            border-radius: 4px;
+            border-left: 3px solid #5865f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="room-info">
+                    <div>
+                        <div class="room-name" id="roomName">加载中...</div>
+                        <div class="room-description" id="roomDescription">加载中...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-nav">
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>数据统计</span>
+                </a>
+                <a href="/rooms" class="nav-item">
+                    <i class="fas fa-door-open"></i>
+                    <span>房间管理</span>
+                </a>
+                <a href="/" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>返回首页</span>
+                </a>
+            </div>
+            
+            <!-- 当前用户信息 -->
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-avatar" id="sidebarUserAvatar">
+                    <span id="sidebarUserInitial">A</span>
+                </div>
+                <div class="sidebar-user-details">
+                    <div class="sidebar-user-name" id="sidebarUserName">加载中...</div>
+                    <div class="sidebar-user-status">在线</div>
+                </div>
+            </div>
+            
+            <!-- TKI控制面板 - 仅管理员可见 -->
+            <div class="tki-control-panel" id="tkiControlPanel" style="display: none;">
+                <div class="tki-panel-header">
+                    <i class="fas fa-robot"></i>
+                    <span>TKI插话风格控制</span>
+                </div>
+                <div class="tki-panel-content">
+                    <div class="tki-style-selector">
+                        <label for="tkiStyle">选择插话风格:</label>
+                        <select id="tkiStyle" onchange="changeTKIStyle()">
+                            <option value="none">无插话</option>
+                            <option value="collaborating">协作型</option>
+                            <option value="accommodating">迁就型</option>
+                            <option value="competing">竞争型</option>
+                            <option value="compromising">妥协型</option>
+                            <option value="avoiding">回避型</option>
+                        </select>
+                    </div>
+                    <div class="tki-style-description" id="tkiStyleDescription">
+                        选择TKI插话风格来控制AI的干预行为
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主聊天区域 -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="chat-header-left">
+                    <div class="channel-info">
+                        <span class="channel-hash">#</span>
+                        <span class="channel-name" id="currentChannel">加载中...</span>
+                        <span class="channel-description" id="channelDescription">TKI智能干预聊天机器人</span>
+                    </div>
+                </div>
+                <div class="chat-header-right">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索消息..." />
+                    </div>
+                    <i class="fas fa-bell-slash header-icon" title="静音通知"></i>
+                    <i class="fas fa-bell header-icon" title="通知设置"></i>
+                    <i class="fas fa-thumbtack header-icon" title="置顶消息"></i>
+                    <i class="fas fa-users header-icon" title="成员列表" onclick="toggleMemberList()"></i>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div style="text-align: center; padding: 40px; color: #96989d;">
+                    <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 20px;"></i>
+                    <p>开始聊天吧！</p>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <div class="input-container">
+                    <div class="input-actions">
+                        <i class="fas fa-plus input-action-btn" title="添加附件"></i>
+                    </div>
+                    
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Message #general"
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"
+                    ></textarea>
+                    <div class="input-right-actions">
+                        <i class="fas fa-gift input-action-btn" title="礼物"></i>
+                        <i class="fas fa-image input-action-btn" title="GIF"></i>
+                        <i class="fas fa-sticky-note input-action-btn" title="贴纸"></i>
+                        <i class="fas fa-smile input-action-btn" title="表情"></i>
+                        <i class="fas fa-gamepad input-action-btn" title="游戏活动"></i>
+                        <button class="send-button" onclick="sendMessage()" id="sendButton">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+            </div>
+        </div>
+
+            </div>
+            <!-- 统计面板 - 暂时隐藏 -->
+            <!--
+    <div class="stats-panel" id="statsPanel">
+        <div class="stats-title">实时统计</div>
+        <div class="stats-item">
+            <span class="stats-label">总消息数:</span>
+            <span class="stats-value" id="totalMessages">0</span>
+        </div>
+        <div class="stats-item">
+            <span class="stats-label">女性消息:</span>
+            <span class="stats-value" id="femaleMessages">0 (0%)</span>
+        </div>
+        <div class="stats-item">
+            <span class="stats-label">男性消息:</span>
+            <span class="stats-value" id="maleMessages">0 (0%)</span>
+        </div>
+        <div class="stats-item">
+            <span class="stats-label">检测到打断:</span>
+            <span class="stats-value" id="interruptions">0次</span>
+        </div>
+        <div class="stats-item">
+            <span class="stats-label">干预次数:</span>
+            <span class="stats-value" id="interventions">0次</span>
+                </div>
+            </div>
+            -->
+        </div>
+
+        <!-- 用户列表侧边栏 -->
+        <div class="users-panel" id="usersPanel">
+            <div class="users-header">
+                成员列表
+                <div class="online-count" id="onlineCount">在线 - 0 | 离线 - 0</div>
+            </div>
+            <div class="user-list" id="userList">
+                <!-- 用户列表将在这里动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        let currentUser = null;
+        let currentRoomId = null;
+        let stats = {
+            totalMessages: 0,
+            femaleMessages: 0,
+            maleMessages: 0,
+            interruptions: 0,
+            interventions: 0
+        };
+
+        // 获取房间ID
+        const roomId = window.location.pathname.split('/').pop();
+
+        // 初始化
+        window.onload = function() {
+            console.log('页面开始初始化...');
+            
+            // 检查登录状态
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.log('未找到登录token，跳转到首页');
+                window.location.href = '/';
+                return;
+            }
+
+            currentRoomId = roomId;
+            console.log('当前房间ID:', currentRoomId);
+            
+            // 获取用户信息
+            loadUserInfo();
+            
+            // 加载房间信息
+            loadRoomInfo();
+            
+            // 连接WebSocket
+            connectWebSocket();
+            
+            // 加载初始数据
+            loadMessages();
+            loadUsers();
+            loadStats();
+            
+            // 页面初始化完成后，定期刷新成员列表
+            setInterval(() => {
+                console.log('定时刷新成员列表...');
+                loadUsers();
+            }, 5000); // 每5秒刷新一次
+            
+            // 全局鼠标事件监听器，确保tooltip正确隐藏
+            document.addEventListener('mouseover', (event) => {
+                // 如果鼠标不在用户头像上，隐藏tooltip
+                if (!event.target.closest('.user-avatar')) {
+                    hideUserTooltip();
+                }
+            });
+            
+            console.log('页面初始化完成');
+        };
+
+        // 页面事件监听器
+        window.addEventListener('beforeunload', () => {
+            console.log('页面即将关闭，离开房间');
+            if (socket) {
+                socket.emit('leave_room', { room: String(currentRoomId) });
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('页面隐藏，离开房间');
+                if (socket) {
+                    socket.emit('leave_room', { room: String(currentRoomId) });
+                }
+            } else {
+                console.log('页面显示，重新加入房间');
+                if (socket) {
+                    socket.emit('join_room', { room: String(currentRoomId) });
+                }
+            }
+        });
+
+        // 加载用户信息
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/user/info', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (response.ok) {
+                    currentUser = await response.json();
+                    updateCurrentUserDisplay();
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+            }
+        }
+
+        // 更新当前用户显示
+        function updateCurrentUserDisplay() {
+            if (!currentUser) return;
+            
+            const sidebarAvatarElement = document.getElementById('sidebarUserAvatar');
+            const sidebarNameElement = document.getElementById('sidebarUserName');
+            const sidebarInitialElement = document.getElementById('sidebarUserInitial');
+            const tkiControlPanel = document.getElementById('tkiControlPanel');
+            
+            if (sidebarAvatarElement && sidebarNameElement && sidebarInitialElement) {
+                // 更新用户名
+                const displayName = currentUser.display_name || currentUser.username;
+                sidebarNameElement.textContent = displayName;
+                
+                // 如果是管理员，显示TKI控制面板
+                if (currentUser.role === 'admin' && tkiControlPanel) {
+                    tkiControlPanel.style.display = 'block';
+                    console.log('显示TKI控制面板 - 管理员权限');
+                } else if (tkiControlPanel) {
+                    tkiControlPanel.style.display = 'none';
+                }
+                
+                // 更新头像
+                if (currentUser.avatar) {
+                    sidebarAvatarElement.innerHTML = `<img src="${currentUser.avatar}" alt="${displayName}">`;
+                } else {
+                    // 如果没有头像，显示用户名首字母
+                    const initial = displayName.charAt(0).toUpperCase();
+                    sidebarInitialElement.textContent = initial;
+                    sidebarAvatarElement.innerHTML = `<span id="sidebarUserInitial">${initial}</span>`;
+                }
+                
+                console.log('侧边栏用户信息已更新:', displayName);
+            }
+        }
+
+        // 加载房间信息
+        async function loadRoomInfo() {
+            try {
+                const response = await fetch(`/api/rooms/${currentRoomId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const room = await response.json();
+                    console.log('房间信息:', room);
+                    
+                    // 更新房间名称
+                    const roomNameElement = document.querySelector('.room-name');
+                    if (roomNameElement) {
+                        roomNameElement.textContent = room.name;
+                    }
+                    
+                    // 更新房间描述
+                    const roomDescriptionElement = document.querySelector('.room-description');
+                    if (roomDescriptionElement) {
+                        roomDescriptionElement.textContent = room.description || '暂无描述';
+                    }
+                } else if (response.status === 404) {
+                    // 房间不存在，跳转到错误页面
+                    window.location.href = '/rooms';
+                } else {
+                    console.error('加载房间信息失败:', response.status);
+                }
+            } catch (error) {
+                console.error('加载房间信息失败:', error);
+            }
+        }
+
+        // 连接WebSocket
+        function connectWebSocket() {
+            console.log('开始连接WebSocket...');
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('WebSocket连接成功，房间ID:', currentRoomId);
+                console.log('Socket ID:', socket.id);
+                
+                // 立即加入房间
+                socket.emit('join_room', { room: String(currentRoomId) });
+                console.log('已发送加入房间事件');
+                
+                // 发送一个测试事件
+                setTimeout(() => {
+                    console.log('发送测试事件...');
+                    socket.emit('test', { message: '前端测试消息' });
+                }, 1000);
+            });
+
+            socket.on('disconnect', () => {
+                console.log('WebSocket连接断开');
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('WebSocket连接错误:', error);
+            });
+
+            // 消息监听器
+            socket.on('message', (data) => {
+                console.log('收到消息:', data);
+                console.log('消息类型:', typeof data);
+                console.log('消息内容:', JSON.stringify(data));
+                console.log('调用addMessage函数...');
+                
+                // 使用addMessage函数来正确显示消息
+                addMessage(data);
+                console.log('addMessage函数调用完成');
+            });
+
+            socket.on('user_joined', (data) => {
+                console.log('收到user_joined', data);
+                console.log('立即调用loadUsers()...');
+                // 立即重新加载用户列表
+                loadUsers();
+                console.log('loadUsers()调用完成');
+            });
+
+            socket.on('user_left', (data) => {
+                console.log('收到user_left', data);
+                console.log('立即调用loadUsers()...');
+                // 立即重新加载用户列表
+                loadUsers();
+                console.log('loadUsers()调用完成');
+            });
+
+            socket.on('intervention', (data) => {
+                console.log('收到干预消息:', data);
+                addIntervention(data);
+                updateStats();
+            });
+
+            // 测试事件监听器（已移除弹窗）
+            socket.on('test', (data) => {
+                console.log('收到测试消息:', data);
+            });
+            
+            // TKI风格更新事件监听器
+            socket.on('tki_style_updated', (data) => {
+                console.log('收到TKI风格更新:', data);
+                updateTKIStyleDisplay(data);
+            });
+
+            console.log('WebSocket事件监听器已设置完成');
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            
+            if (!content) return;
+
+            console.log('开始发送消息:', content);
+            console.log('当前用户:', currentUser);
+            console.log('WebSocket状态:', socket ? '已连接' : '未连接');
+            console.log('房间ID:', currentRoomId);
+            console.log('Socket ID:', socket ? socket.id : '无');
+
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+
+            try {
+                const messageData = {
+                    content: content,
+                    gender: currentUser.gender || 'unknown'
+                };
+
+                console.log('消息数据:', messageData);
+
+                // 通过WebSocket发送消息
+                if (socket) {
+                    const emitData = {
+                        room: String(currentRoomId),
+                        message: messageData
+                    };
+                    console.log('发送WebSocket事件:', emitData);
+                    socket.emit('send_message', emitData);
+                    input.value = '';
+                    console.log('消息已发送到WebSocket');
+                    
+                    // 等待一下看看是否收到回复
+                    setTimeout(() => {
+                        console.log('3秒后检查是否收到消息...');
+                    }, 3000);
+                } else {
+                    console.error('WebSocket未连接');
+                }
+            } catch (error) {
+                console.error('发送消息失败:', error);
+            } finally {
+                sendButton.disabled = false;
+            }
+        }
+
+        // 处理键盘事件
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // 添加消息到界面
+        function addMessage(data) {
+            try {
+            const messagesContainer = document.getElementById('chatMessages');
+                if (!messagesContainer) {
+                    console.error('找不到消息容器元素');
+                    return;
+                }
+            
+            // 清除欢迎消息
+            if (messagesContainer.children.length === 1 && 
+                messagesContainer.children[0].querySelector('.fa-comments')) {
+                messagesContainer.innerHTML = '';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+                
+                // 使用用户头像或默认头像
+                if (data.avatar && data.avatar.trim() !== '') {
+                    const img = document.createElement('img');
+                    img.src = data.avatar;
+                    img.alt = data.author;
+                    img.onerror = function() {
+                        // 如果头像加载失败，显示用户名首字母
+            avatar.textContent = data.author.charAt(0).toUpperCase();
+                    };
+                    avatar.appendChild(img);
+                } else {
+                    // 没有头像时显示用户名首字母
+                    avatar.textContent = data.author.charAt(0).toUpperCase();
+                }
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            const header = document.createElement('div');
+            header.className = 'message-header';
+            
+            const author = document.createElement('span');
+            author.className = 'message-author';
+            author.textContent = data.author;
+            
+            const timestamp = document.createElement('span');
+            timestamp.className = 'message-timestamp';
+                // 显示本地时间，格式为 HH:MM:SS
+                const localTime = new Date(data.timestamp).toLocaleTimeString('zh-CN', {
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                timestamp.textContent = localTime;
+            
+            header.appendChild(author);
+            header.appendChild(timestamp);
+            
+            const text = document.createElement('div');
+            text.className = 'message-text';
+            text.textContent = data.content;
+            
+            content.appendChild(header);
+            content.appendChild(text);
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // 更新统计
+            stats.totalMessages++;
+            updateStats();
+            } catch (error) {
+                console.error('添加消息时出错:', error);
+            }
+        }
+
+        // 添加干预消息
+        function addIntervention(data) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const interventionDiv = document.createElement('div');
+            interventionDiv.className = 'message';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            const header = document.createElement('div');
+            header.className = 'message-header';
+            
+            const author = document.createElement('span');
+            author.className = 'message-author';
+            author.textContent = 'TKI干预机器人';
+            
+            const timestamp = document.createElement('span');
+            timestamp.className = 'message-timestamp';
+            // 显示本地时间，格式为 HH:MM:SS
+            const localTime = new Date(data.timestamp).toLocaleTimeString('zh-CN', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            timestamp.textContent = localTime;
+            
+            header.appendChild(author);
+            header.appendChild(timestamp);
+            
+            const interventionContent = document.createElement('div');
+            interventionContent.className = 'intervention-message';
+            
+            const strategy = document.createElement('div');
+            strategy.className = 'strategy';
+            strategy.textContent = `干预策略: ${data.strategy}`;
+            
+            const text = document.createElement('div');
+            text.className = 'message-text';
+            text.textContent = data.text;
+            
+            interventionContent.appendChild(strategy);
+            interventionContent.appendChild(text);
+            
+            content.appendChild(header);
+            content.appendChild(interventionContent);
+            
+            interventionDiv.appendChild(avatar);
+            interventionDiv.appendChild(content);
+            
+            messagesContainer.appendChild(interventionDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // 更新统计
+            stats.interventions++;
+            updateStats();
+        }
+
+        // 加载消息历史
+        async function loadMessages() {
+            try {
+                const response = await fetch(`/api/rooms/${currentRoomId}/messages`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const messages = await response.json();
+                    const messagesContainer = document.getElementById('chatMessages');
+                    messagesContainer.innerHTML = '';
+                    
+                    messages.forEach(msg => {
+                        addMessage(msg);
+                    });
+                }
+            } catch (error) {
+                console.error('加载消息失败:', error);
+            }
+        }
+
+        // 加载房间成员列表
+        async function loadUsers() {
+            console.log('开始加载用户列表，房间ID:', currentRoomId);
+            try {
+                // 添加时间戳防止缓存
+                const timestamp = new Date().getTime();
+                const response = await fetch(`/api/rooms/${currentRoomId}/members?t=${timestamp}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                console.log('API响应状态:', response.status);
+                console.log('API响应头:', response.headers);
+                
+                if (response.ok) {
+                    const members = await response.json();
+                    console.log('加载到的成员:', members);
+                    console.log('成员数量:', members.length);
+                    console.log('成员详情:', JSON.stringify(members, null, 2));
+                    
+                    displayUsers(members);
+                } else {
+                    console.error('加载房间成员失败:', response.status, response.statusText);
+                    const responseText = await response.text();
+                    console.error('错误响应内容:', responseText);
+                    // 显示错误信息
+                    const userList = document.getElementById('userList');
+                    if (userList) {
+                        userList.innerHTML = '<div style="padding: 20px; text-align: center; color: #f04747; font-size: 14px;">加载成员失败</div>';
+                    } else {
+                        console.error('找不到userList元素');
+                    }
+                }
+            } catch (error) {
+                console.error('加载房间成员失败:', error);
+                // 显示错误信息
+                const userList = document.getElementById('userList');
+                if (userList) {
+                    userList.innerHTML = '<div style="padding: 20px; text-align: center; color: #f04747; font-size: 14px;">网络错误</div>';
+                } else {
+                    console.error('找不到userList元素');
+                }
+            }
+        }
+
+        // 显示房间成员列表
+        function displayUsers(members) {
+            console.log('开始显示用户列表，成员数量:', members.length);
+            const userList = document.getElementById('userList');
+            if (!userList) {
+                console.error('找不到userList元素');
+                return;
+            }
+            
+            console.log('找到userList元素，开始处理成员数据');
+            const onlineCount = members.filter(member => member.is_online).length;
+            const offlineCount = members.length - onlineCount;
+            
+            console.log('在线用户数:', onlineCount, '离线用户数:', offlineCount);
+            
+            // 更新在线人数显示
+            const onlineCountElement = document.getElementById('onlineCount');
+            if (onlineCountElement) {
+                onlineCountElement.textContent = `在线 - ${onlineCount} | 离线 - ${offlineCount}`;
+                console.log('已更新在线人数显示');
+            } else {
+                console.error('找不到onlineCount元素');
+            }
+            
+            // 清空用户列表
+            userList.innerHTML = '';
+            console.log('已清空用户列表');
+            
+            // 如果没有用户，显示提示信息
+            if (members.length === 0) {
+                console.log('没有成员，显示空状态');
+                const emptyMessage = document.createElement('div');
+                emptyMessage.style.cssText = 'padding: 20px; text-align: center; color: #96989d; font-size: 14px;';
+                emptyMessage.innerHTML = '<i class="fas fa-users" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>暂无成员';
+                userList.appendChild(emptyMessage);
+                return;
+            }
+            
+            // 添加在线用户
+            const onlineUsers = members.filter(member => member.is_online);
+            console.log('在线用户:', onlineUsers);
+            
+            if (onlineUsers.length > 0) {
+                console.log('添加在线用户标题');
+                const onlineHeader = document.createElement('div');
+                onlineHeader.className = 'user-section-header';
+                onlineHeader.textContent = `在线 - ${onlineUsers.length}`;
+                onlineHeader.style.cssText = 'padding: 8px 16px; font-size: 12px; color: #96989d; font-weight: 600; background: #2f3136; border-bottom: 1px solid #202225;';
+                userList.appendChild(onlineHeader);
+                
+                onlineUsers.forEach(member => {
+                    addUserToList(member);
+                });
+            }
+            
+            // 添加离线用户
+            const offlineUsers = members.filter(member => !member.is_online);
+            console.log('离线用户:', offlineUsers);
+            
+            if (offlineUsers.length > 0) {
+                console.log('添加离线用户标题');
+                const offlineHeader = document.createElement('div');
+                offlineHeader.className = 'user-section-header';
+                offlineHeader.textContent = `离线 - ${offlineUsers.length}`;
+                offlineHeader.style.cssText = 'padding: 8px 16px; font-size: 12px; color: #96989d; font-weight: 600; background: #2f3136; border-bottom: 1px solid #202225;';
+                userList.appendChild(offlineHeader);
+                
+                offlineUsers.forEach(member => {
+                    addUserToList(member);
+                });
+            }
+        }
+
+        // 添加用户到列表
+        function addUserToList(member) {
+            console.log('添加用户到列表:', member);
+            const userList = document.getElementById('userList');
+            if (!userList) {
+                console.error('找不到userList元素');
+                return;
+            }
+            
+            const userDiv = document.createElement('div');
+            userDiv.className = `user-item ${member.is_online ? 'online' : 'offline'}`;
+            userDiv.dataset.userId = member.user_id;
+            
+            const displayName = member.display_name || member.username;
+            const statusClass = member.is_online ? 'online' : 'offline';
+            const statusText = member.is_online ? '在线' : '离线';
+            
+            console.log('用户信息:', {
+                username: member.username,
+                displayName: displayName,
+                isOnline: member.is_online,
+                statusClass: statusClass,
+                statusText: statusText
+            });
+            
+            // 转义特殊字符，防止XSS
+            const safeUsername = member.username.replace(/[<>'"]/g, '');
+            const safeDisplayName = displayName.replace(/[<>'"]/g, '');
+            
+            userDiv.innerHTML = `
+                    <div class="user-avatar" 
+                     onmouseenter="showUserTooltip(event, '${safeUsername}', '${safeDisplayName}', '${member.gender || 'unknown'}', '${member.role || 'member'}')"
+                     onmouseleave="hideUserTooltip()"
+                     onmouseout="hideUserTooltip()">
+                    ${member.avatar ? `<img src="${member.avatar}" alt="${safeUsername}">` : safeUsername.charAt(0).toUpperCase()}
+                    <div class="status-indicator ${statusClass}"></div>
+                    </div>
+                    <div class="user-info">
+                    <div class="user-name">${safeDisplayName}</div>
+                    <div class="user-status">${statusText}</div>
+                    </div>
+            `;
+            
+            userList.appendChild(userDiv);
+            console.log('已添加用户到列表:', member.username);
+        }
+
+        // 显示用户提示
+        function showUserTooltip(event, username, displayName, gender, role) {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'user-tooltip';
+            tooltip.id = 'userTooltip';
+            
+            const genderText = gender === 'male' ? '♂ 男性' : gender === 'female' ? '♀ 女性' : '? 未知';
+            const roleText = role === 'admin' ? '管理员' : '成员';
+            const nameText = displayName ? `${displayName} (${username})` : username;
+            
+            tooltip.innerHTML = `
+                <div><strong>${nameText}</strong></div>
+                <div>${genderText}</div>
+                <div>${roleText}</div>
+            `;
+            
+            document.body.appendChild(tooltip);
+            
+            // 定位提示框
+            const rect = event.target.getBoundingClientRect();
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+            
+            // 显示提示框
+            setTimeout(() => tooltip.classList.add('show'), 10);
+        }
+
+        // 隐藏用户提示
+        function hideUserTooltip() {
+            const tooltip = document.getElementById('userTooltip');
+            if (tooltip) {
+                tooltip.classList.remove('show');
+                setTimeout(() => {
+                    if (tooltip && tooltip.parentNode) {
+                        tooltip.remove();
+                    }
+                }, 200);
+            }
+        }
+
+        // 添加用户到列表
+        function addUser(userData) {
+            const userList = document.getElementById('userList');
+            const userDiv = document.createElement('div');
+            userDiv.className = 'user-item';
+            userDiv.innerHTML = `
+                <div class="user-avatar">${userData.username.charAt(0).toUpperCase()}</div>
+                <div class="user-info">
+                    <div class="user-name">${userData.username}</div>
+                    <div class="user-status">在线</div>
+                </div>
+                <div class="status-indicator"></div>
+            `;
+            userList.appendChild(userDiv);
+            updateOnlineCount();
+        }
+
+        // 从列表中移除用户
+        function removeUser(userId) {
+            const userItems = document.querySelectorAll('.user-item');
+            userItems.forEach(item => {
+                if (item.dataset.userId === userId) {
+                    item.remove();
+                }
+            });
+            updateOnlineCount();
+        }
+
+        // 更新在线人数
+        function updateOnlineCount() {
+            const userItems = document.querySelectorAll('.user-item');
+            const count = userItems.length;
+            document.getElementById('onlineCount').textContent = `${count}人在线`;
+            document.getElementById('userCount').textContent = count;
+        }
+
+        // 加载统计数据
+        async function loadStats() {
+            try {
+                const response = await fetch(`/api/stats/${currentRoomId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    stats = data;
+                    updateStats();
+                }
+            } catch (error) {
+                console.log('加载统计失败:', error);
+                // 使用默认统计
+                stats = {
+                    totalMessages: 0,
+                    femaleMessages: 0,
+                    maleMessages: 0,
+                    interruptions: 0,
+                    interventions: 0
+                };
+            }
+        }
+
+        // 更新统计显示
+        function updateStats() {
+            try {
+                const totalMessagesEl = document.getElementById('totalMessages');
+                const femaleMessagesEl = document.getElementById('femaleMessages');
+                const maleMessagesEl = document.getElementById('maleMessages');
+                const interruptionsEl = document.getElementById('interruptions');
+                const interventionsEl = document.getElementById('interventions');
+                
+                if (totalMessagesEl) totalMessagesEl.textContent = stats.totalMessages;
+                if (femaleMessagesEl) femaleMessagesEl.textContent = 
+                `${stats.femaleMessages} (${stats.femalePercentage || 0}%)`;
+                if (maleMessagesEl) maleMessagesEl.textContent = 
+                `${stats.maleMessages} (${stats.malePercentage || 0}%)`;
+                if (interruptionsEl) interruptionsEl.textContent = `${stats.interruptions}次`;
+                if (interventionsEl) interventionsEl.textContent = `${stats.interventions}次`;
+            } catch (error) {
+                console.log('更新统计显示时出错:', error);
+            }
+        }
+
+        // 切换成员列表显示
+        function toggleMemberList() {
+            const usersPanel = document.getElementById('usersPanel');
+            if (usersPanel.style.display === 'none') {
+                usersPanel.style.display = 'flex'; // Changed from 'block' to 'flex'
+            } else {
+                usersPanel.style.display = 'none';
+            }
+        }
+
+        // TKI风格选择函数
+        function changeTKIStyle() {
+            const tkiStyle = document.getElementById('tkiStyle').value;
+            const descriptionEl = document.getElementById('tkiStyleDescription');
+            
+            // 定义各种风格的描述
+            const styleDescriptions = {
+                'none': '无插话 - AI不会进行任何干预',
+                'collaborating': '协作型 - 整合各方观点，推动共识，平衡支持女性表达与维护群体和谐',
+                'accommodating': '迁就型 - 优先维护和谐，用温和语气为女性缓颊，避免冲突',
+                'competing': '竞争型 - 强势捍卫女性表达权，正面对抗偏见，可能激化冲突',
+                'compromising': '妥协型 - 设置公平讨论机制，保障发言机会，不参与观点评价',
+                'avoiding': '回避型 - 岔开矛盾话题，表面轻松，实则削弱女性表达机会'
+            };
+            
+            // 更新描述
+            if (descriptionEl) {
+                descriptionEl.textContent = styleDescriptions[tkiStyle] || '选择TKI插话风格来控制AI的干预行为';
+            }
+            
+            // 发送风格选择到后端
+            if (socket) {
+                socket.emit('tki_style_change', {
+                    room: String(currentRoomId),
+                    style: tkiStyle
+                });
+                console.log('TKI风格已更改为:', tkiStyle);
+            }
+            
+            // 显示确认消息
+            showNotification(`TKI风格已设置为: ${document.getElementById('tkiStyle').options[document.getElementById('tkiStyle').selectedIndex].text}`);
+        }
+        
+        // 更新TKI风格显示
+        function updateTKIStyleDisplay(data) {
+            const tkiStyleSelect = document.getElementById('tkiStyle');
+            const descriptionEl = document.getElementById('tkiStyleDescription');
+            
+            if (tkiStyleSelect && descriptionEl) {
+                // 更新选择框
+                tkiStyleSelect.value = data.style;
+                
+                // 更新描述
+                descriptionEl.textContent = data.description;
+                
+                console.log('TKI风格显示已更新:', data.style);
+            }
+        }
+        
+        // 显示通知消息
+        function showNotification(message) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #5865f2;
+                color: white;
+                padding: 12px 16px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+
+    </script>
+</body>
+</html> 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>消息发送测试</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>消息发送测试</h1>
+    <div>
+        <input type="text" id="messageInput" placeholder="输入消息">
+        <button onclick="sendMessage()">发送</button>
+    </div>
+    <div id="messages"></div>
+
+    <script>
+        let socket = io('http://localhost:8080');
+        
+        socket.on('connect', () => {
+            console.log('WebSocket连接成功');
+            socket.emit('join_room', { room: '8' });
+        });
+        
+        socket.on('message', (data) => {
+            console.log('收到消息:', data);
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<div>${data.author}: ${data.content}</div>`;
+        });
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            console.log('发送消息:', content);
+            
+            socket.emit('send_message', {
+                room: '8',
+                message: {
+                    content: content,
+                    gender: 'unknown'
+                }
+            });
+            
+            input.value = '';
+        }
+    </script>
+</body>
+</html> 

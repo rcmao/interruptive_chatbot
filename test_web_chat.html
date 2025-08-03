@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试Chatbot插话功能</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f0f0f0;
+        }
+        .intervention {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .intervention .strategy {
+            font-weight: bold;
+            color: #856404;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Chatbot插话功能测试</h1>
+        
+        <div class="test-section">
+            <h3>连接状态</h3>
+            <div id="connection-status" class="status info">正在连接...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>测试场景</h3>
+            <p>点击下面的按钮来模拟不同的对话场景，观察chatbot是否会插话：</p>
+            
+            <button onclick="testFemaleInterrupted()">测试：女性被打断</button>
+            <button onclick="testFemaleIgnored()">测试：女性被忽视</button>
+            <button onclick="testMaleDominance()">测试：男性主导对话</button>
+            <button onclick="testAggressiveContext()">测试：攻击性语境</button>
+            <button onclick="clearMessages()">清空消息</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>消息记录</h3>
+            <div id="messages"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>统计信息</h3>
+            <div id="stats">
+                <p>总消息数: <span id="total-messages">0</span></p>
+                <p>干预次数: <span id="intervention-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 连接Socket.IO
+        const socket = io('http://localhost:8080');
+        
+        // 统计信息
+        let stats = {
+            totalMessages: 0,
+            interventions: 0
+        };
+        
+        // 连接状态处理
+        socket.on('connect', () => {
+            document.getElementById('connection-status').className = 'status success';
+            document.getElementById('connection-status').textContent = '✅ 已连接到服务器';
+        });
+        
+        socket.on('disconnect', () => {
+            document.getElementById('connection-status').className = 'status error';
+            document.getElementById('connection-status').textContent = '❌ 连接断开';
+        });
+        
+        // 监听干预消息
+        socket.on('intervention', (data) => {
+            console.log('收到干预消息:', data);
+            addInterventionMessage(data);
+            stats.interventions++;
+            updateStats();
+        });
+        
+        // 监听普通消息
+        socket.on('message', (data) => {
+            console.log('收到消息:', data);
+            addMessage(data);
+            stats.totalMessages++;
+            updateStats();
+        });
+        
+        function addMessage(data) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `
+                <strong>${data.author}</strong>: ${data.content}
+                <small>${new Date(data.timestamp).toLocaleTimeString()}</small>
+            `;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function addInterventionMessage(data) {
+            const messagesDiv = document.getElementById('messages');
+            const interventionDiv = document.createElement('div');
+            interventionDiv.className = 'message intervention';
+            interventionDiv.innerHTML = `
+                <div class="strategy">🤖 Chatbot (${data.strategy})</div>
+                <div>${data.text}</div>
+                <small>触发类型: ${data.trigger_type} | 置信度: ${data.confidence}</small>
+                <br><small>${new Date(data.timestamp).toLocaleTimeString()}</small>
+            `;
+            messagesDiv.appendChild(interventionDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function updateStats() {
+            document.getElementById('total-messages').textContent = stats.totalMessages;
+            document.getElementById('intervention-count').textContent = stats.interventions;
+        }
+        
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+            stats.totalMessages = 0;
+            stats.interventions = 0;
+            updateStats();
+        }
+        
+        // 测试场景
+        function testFemaleInterrupted() {
+            const scenarios = [
+                { author: 'Lily', content: '我觉得这个问题可以从另一个角度来考虑...', gender: 'female' },
+                { author: 'Alex', content: '不对，你说得不对，应该是这样...', gender: 'male' },
+                { author: 'Alex', content: '而且我觉得你的想法太简单了', gender: 'male' }
+            ];
+            
+            scenarios.forEach((scenario, index) => {
+                setTimeout(() => {
+                    socket.emit('send_message', {
+                        content: scenario.content,
+                        room_id: '1'  // 假设房间ID为1
+                    });
+                }, index * 2000);  // 每2秒发送一条消息
+            });
+        }
+        
+        function testFemaleIgnored() {
+            const scenarios = [
+                { author: 'Lily', content: '我想分享一下我的观点...', gender: 'female' },
+                { author: 'Alex', content: '好的，请说', gender: 'male' },
+                { author: 'Lily', content: '我觉得我们应该...', gender: 'female' },
+                { author: 'Zack', content: 'Alex，你觉得怎么样？', gender: 'male' },
+                { author: 'Alex', content: '我觉得应该这样做...', gender: 'male' }
+            ];
+            
+            scenarios.forEach((scenario, index) => {
+                setTimeout(() => {
+                    socket.emit('send_message', {
+                        content: scenario.content,
+                        room_id: '1'
+                    });
+                }, index * 2000);
+            });
+        }
+        
+        function testMaleDominance() {
+            const scenarios = [
+                { author: 'Alex', content: '这个问题很简单', gender: 'male' },
+                { author: 'Zack', content: '我同意Alex的看法', gender: 'male' },
+                { author: 'Alex', content: '我们应该这样做...', gender: 'male' },
+                { author: 'Zack', content: '完全正确', gender: 'male' },
+                { author: 'Alex', content: '就这么决定了', gender: 'male' }
+            ];
+            
+            scenarios.forEach((scenario, index) => {
+                setTimeout(() => {
+                    socket.emit('send_message', {
+                        content: scenario.content,
+                        room_id: '1'
+                    });
+                }, index * 2000);
+            });
+        }
+        
+        function testAggressiveContext() {
+            const scenarios = [
+                { author: 'Lily', content: '我觉得我们可以讨论一下...', gender: 'female' },
+                { author: 'Alex', content: '你错了，别废话了', gender: 'male' },
+                { author: 'Alex', content: '你懂什么？', gender: 'male' },
+                { author: 'Lily', content: '我只是想...', gender: 'female' },
+                { author: 'Alex', content: '闭嘴，听我说', gender: 'male' }
+            ];
+            
+            scenarios.forEach((scenario, index) => {
+                setTimeout(() => {
+                    socket.emit('send_message', {
+                        content: scenario.content,
+                        room_id: '1'
+                    });
+                }, index * 2000);
+            });
+        }
+    </script>
+</body>
+</html> 

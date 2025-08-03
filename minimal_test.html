@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>最小化WebSocket测试</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>最小化WebSocket测试</h1>
+    <div>
+        <input type="text" id="messageInput" placeholder="输入消息">
+        <button onclick="sendMessage()">发送</button>
+    </div>
+    <div id="status">状态: 未连接</div>
+    <div id="messages"></div>
+    <button onclick="testEmit()">测试广播</button>
+
+    <script>
+        let socket = io('http://localhost:8080');
+        
+        socket.on('connect', () => {
+            console.log('WebSocket连接成功');
+            document.getElementById('status').textContent = '状态: 已连接';
+            socket.emit('join_room', { room: '8' });
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('WebSocket连接断开');
+            document.getElementById('status').textContent = '状态: 连接断开';
+        });
+        
+        socket.on('connect_error', (error) => {
+            console.error('WebSocket连接错误:', error);
+            document.getElementById('status').textContent = '状态: 连接错误';
+        });
+        
+        socket.on('message', (data) => {
+            console.log('收到消息:', data);
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<div style="margin: 10px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                <strong>${data.author}</strong>: ${data.content}
+                <br><small>时间: ${new Date(data.timestamp).toLocaleString()}</small>
+            </div>`;
+        });
+        
+        socket.on('test', (data) => {
+            console.log('收到测试消息:', data);
+            alert('收到测试消息: ' + JSON.stringify(data));
+        });
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            console.log('发送消息:', content);
+            
+            socket.emit('send_message', {
+                room: '8',
+                message: {
+                    content: content,
+                    gender: 'unknown'
+                }
+            });
+            
+            input.value = '';
+        }
+        
+        function testEmit() {
+            console.log('测试广播消息');
+            socket.emit('send_message', {
+                room: '8',
+                message: {
+                    content: '测试消息',
+                    gender: 'unknown'
+                }
+            });
+        }
+        
+        // 回车发送
+        document.getElementById('messageInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html> 

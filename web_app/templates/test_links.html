@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>链接测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-link {
+            color: #5865f2;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+        .test-link:hover {
+            color: #4752c4;
+            background-color: rgba(88, 101, 242, 0.1);
+        }
+        .form {
+            display: none;
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .form.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>链接功能测试</h1>
+    
+    <p>还没有账号？ <a href="#" class="test-link" onclick="showRegister(); return false;">立即注册</a></p>
+    
+    <div id="registerForm" class="form">
+        <h3>注册表单</h3>
+        <p>这是注册表单，如果你看到这个，说明链接工作正常！</p>
+        <button onclick="showLogin()">返回登录</button>
+    </div>
+    
+    <div id="loginForm" class="form show">
+        <h3>登录表单</h3>
+        <p>这是登录表单</p>
+        <p>已有账号？ <a href="#" class="test-link" onclick="showLogin(); return false;">立即登录</a></p>
+    </div>
+    
+    <script>
+        function showRegister() {
+            console.log('显示注册表单');
+            document.getElementById('loginForm').classList.remove('show');
+            document.getElementById('registerForm').classList.add('show');
+        }
+        
+        function showLogin() {
+            console.log('显示登录表单');
+            document.getElementById('registerForm').classList.remove('show');
+            document.getElementById('loginForm').classList.add('show');
+        }
+    </script>
+</body>
+</html> 

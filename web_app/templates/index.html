@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">TKI性别意识智能干预聊天机器人</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            display: flex;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 250px;
+            background: #2f3136;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: #202225;
+            border-bottom: 1px solid #40444b;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: #40444b;
+        }
+
+        .nav-item.active {
+            background: #5865f2;
+        }
+
+        .nav-item i {
+            width: 20px;
+        }
+
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #40444b;
+            transition: background 0.2s;
+        }
+
+        .conversation-item:hover {
+            background: #40444b;
+        }
+
+        .conversation-item.active {
+            background: #5865f2;
+        }
+
+        .conversation-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .conversation-meta {
+            font-size: 12px;
+            color: #b9bbbe;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #36393f;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: #36393f;
+            border-bottom: 1px solid #40444b;
+            color: white;
+        }
+
+        .chat-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #36393f;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: white;
+        }
+
+        .message-timestamp {
+            font-size: 12px;
+            color: #72767d;
+        }
+
+        .message-text {
+            color: #dcddde;
+            line-height: 1.4;
+        }
+
+        .intervention-message {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        .intervention-message .strategy {
+            font-weight: 600;
+            color: #ffc107;
+            margin-bottom: 5px;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: #36393f;
+            border-top: 1px solid #40444b;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: #40444b;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 14px;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #5865f2;
+        }
+
+        .send-button {
+            background: #5865f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .send-button:hover {
+            background: #4752c4;
+        }
+
+        .send-button:disabled {
+            background: #40444b;
+            cursor: not-allowed;
+        }
+
+        /* 登录/注册表单 */
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .auth-container h1 {
+            color: #5865f2;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #5865f2;
+        }
+
+        .auth-button {
+            width: 100%;
+            background: #5865f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 15px;
+        }
+
+        .auth-button:hover {
+            background: #4752c4;
+        }
+
+        .auth-switch {
+            color: #5865f2;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s;
+            font-weight: 600;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .auth-switch:hover {
+            color: #4752c4;
+            text-decoration: none;
+            background-color: rgba(88, 101, 242, 0.1);
+        }
+
+        .error-message {
+            color: #ed4245;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            color: #3ba55c;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        /* 用户信息 */
+        .user-info {
+            padding: 15px 20px;
+            background: #292b2f;
+            border-top: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-info:hover {
+            background: #40444b;
+        }
+
+        .user-info:hover::after {
+            content: "点击修改用户资料";
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        .user-info:hover .user-avatar {
+            transform: scale(1.1);
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .username {
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: white;
+        }
+
+        /* 语言切换按钮 */
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #5865f2;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #5865f2;
+        }
+
+        .lang-btn:hover {
+            background: #5865f2;
+            color: white;
+        }
+
+        .lang-btn.active {
+            background: #5865f2;
+            color: white;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .sidebar {
+                width: 200px;
+            }
+
+            .auth-container {
+                width: 95%;
+                padding: 30px 20px;
+            }
+            
+            .language-switcher {
+                position: relative;
+                top: auto;
+                right: auto;
+                justify-content: center;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录/注册界面 -->
+    <div id="authContainer" class="auth-container">
+        <h1><i class="fas fa-robot"></i> <span id="appTitle">TKI智能干预机器人</span></h1>
+        <p style="color: #666; margin-bottom: 30px;" id="appSubtitle">基于Thomas-Kilmann冲突管理模型的性别结构性边缘化干预系统</p>
+        
+        <div id="loginForm">
+            <div class="form-group">
+                <label for="loginUsername" id="loginUsernameLabel">用户名</label>
+                <input type="text" id="loginUsername" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword" id="loginPasswordLabel">密码</label>
+                <input type="password" id="loginPassword" placeholder="请输入密码">
+            </div>
+            <button class="auth-button" onclick="login()" id="loginButton">登录</button>
+            <p id="noAccountText">还没有账号？ <a href="/register" class="auth-switch" id="registerNowText" style="color: #5865f2; text-decoration: underline; font-weight: bold;">立即注册</a></p>
+        </div>
+
+        <div id="registerForm" style="display: none;">
+            <div class="form-group">
+                <label for="registerUsername" id="registerUsernameLabel">用户名</label>
+                <input type="text" id="registerUsername" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="registerEmail" id="registerEmailLabel">邮箱</label>
+                <input type="email" id="registerEmail" placeholder="请输入邮箱">
+            </div>
+            <div class="form-group">
+                <label for="registerPassword" id="registerPasswordLabel">密码</label>
+                <input type="password" id="registerPassword" placeholder="请输入密码">
+            </div>
+            <div class="form-group">
+                <label for="inviteCode" id="inviteCodeLabel">邀请码</label>
+                <input type="text" id="inviteCode" placeholder="请输入邀请码（可选）">
+                <small style="color: #666; font-size: 12px;">公开注册码：PUBLIC，管理员邀请码请联系管理员</small>
+            </div>
+            <button class="auth-button" onclick="register()" id="registerButton">注册</button>
+            <p id="hasAccountText">已有账号？ <a href="#" class="auth-switch" onclick="showLogin(); return false;" id="loginNowText" style="color: #5865f2; text-decoration: underline; font-weight: bold;">立即登录</a></p>
+        </div>
+
+        <div id="authMessage"></div>
+        
+        <!-- 语言切换按钮 -->
+        <div class="language-switcher">
+            <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">🇨🇳 中文</button>
+            <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">🇬🇧 English</button>
+        </div>
+    </div>
+
+    <!-- 主应用界面 -->
+    <div id="mainContainer" class="container" style="display: none;">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-robot"></i> TKI机器人</h2>
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-item active" onclick="showConversations()">
+                    <i class="fas fa-comments"></i>
+                    <span id="conversationsNav">对话列表</span>
+                </div>
+                <div class="nav-item" onclick="showAnalysis()">
+                    <i class="fas fa-chart-bar"></i>
+                    <span id="analysisNav">分析报告</span>
+                </div>
+                <div class="nav-item" onclick="createNewConversation()">
+                    <i class="fas fa-plus"></i>
+                    <span id="newConversationNav">新建对话</span>
+                </div>
+                <div class="nav-item" onclick="showSettings()">
+                    <i class="fas fa-cog"></i>
+                    <span id="settingsNav">设置</span>
+                </div>
+                <div class="nav-item" onclick="goToProfile()">
+                    <i class="fas fa-user-edit"></i>
+                    <span>用户资料</span>
+                </div>
+                <div class="nav-item" id="adminPanel" style="display: none;" onclick="goToAdmin()">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>管理员面板</span>
+                </div>
+            </div>
+
+            <div class="conversation-list" id="conversationList">
+                <!-- 对话列表将在这里动态加载 -->
+            </div>
+
+            <div class="user-info" onclick="goToProfile()" title="点击修改用户资料">
+                <div class="user-avatar" id="userAvatar"></div>
+                <div class="user-details">
+                    <div class="username" id="username"></div>
+                </div>
+                <button class="logout-btn" onclick="logout()" title="退出登录">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <div class="chat-header">
+                <h3 id="currentConversationTitle">选择或创建一个对话开始聊天</h3>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- 消息将在这里动态加载 -->
+            </div>
+
+            <div class="chat-input">
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="输入消息..."
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"
+                    ></textarea>
+                    <button class="send-button" onclick="sendMessage()" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentConversation = null;
+        let conversations = [];
+        let messages = [];
+        let currentLanguage = 'zh';
+        let translations = {};
+
+        // 显示注册表单
+        function showRegister() {
+            console.log('显示注册表单函数被调用');
+            try {
+                const loginForm = document.getElementById('loginForm');
+                const registerForm = document.getElementById('registerForm');
+                const authMessage = document.getElementById('authMessage');
+                
+                if (loginForm && registerForm && authMessage) {
+                    loginForm.style.display = 'none';
+                    registerForm.style.display = 'block';
+                    authMessage.innerHTML = '';
+                    console.log('注册表单显示成功');
+                } else {
+                    console.error('找不到必要的DOM元素');
+                }
+            } catch (error) {
+                console.error('显示注册表单时出错:', error);
+            }
+        }
+
+        // 显示登录表单
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('authMessage').innerHTML = '';
+        }
+
+        // 注册
+        async function register() {
+            console.log('注册函数被调用');
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const inviteCode = document.getElementById('inviteCode').value;
+
+            console.log('表单数据:', { username, email, password: '***', inviteCode });
+
+            if (!username || !email || !password) {
+                showAuthMessage(t('missing_fields'), 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username, 
+                        email, 
+                        password, 
+                        invite_code: inviteCode || 'PUBLIC' 
+                    })
+                });
+
+                const data = await response.json();
+
+                                if (response.ok) {
+                    showAuthMessage(t('register_success'), 'success');
+                    currentUser = data.user;
+                    localStorage.setItem('token', data.token);
+                    
+                    // 注册成功后直接跳转到房间管理页面
+                    setTimeout(() => {
+                        window.location.href = '/rooms';
+                    }, 1000);
+                } else {
+                    showAuthMessage(data.error, 'error');
+                }
+        } catch (error) {
+            showAuthMessage(t('register_failed'), 'error');
+        }
+        }
+
+        // 登录
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                showAuthMessage(t('missing_fields'), 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAuthMessage(t('login_success'), 'success');
+                    currentUser = data.user;
+                    localStorage.setItem('token', data.token);
+                    
+                    // 登录成功后直接跳转到房间管理页面
+                    setTimeout(() => {
+                        window.location.href = '/rooms';
+                    }, 1000);
+                } else {
+                    showAuthMessage(data.error, 'error');
+                }
+        } catch (error) {
+                showAuthMessage(t('login_failed'), 'error');
+        }
+        }
+
+        // 显示认证消息
+        function showAuthMessage(message, type) {
+            const messageDiv = document.getElementById('authMessage');
+            messageDiv.innerHTML = `<div class="${type}-message">${message}</div>`;
+        }
+
+        // 显示主应用
+        function showMainApp() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'flex';
+            
+            // 设置用户信息
+            document.getElementById('username').textContent = currentUser.username;
+            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            
+            // 如果是管理员，显示管理员面板
+            if (currentUser.role === 'admin') {
+                document.getElementById('adminPanel').style.display = 'block';
+            }
+            
+            // 加载对话列表
+            loadConversations();
+        }
+
+        // 登出
+        async function logout() {
+            try {
+                await fetch('/api/logout');
+            } catch (error) {
+                console.error('登出错误:', error);
+            }
+            
+            localStorage.removeItem('token');
+            currentUser = null;
+            currentConversation = null;
+            
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('authContainer').style.display = 'block';
+            showLogin();
+        }
+
+        // 加载对话列表
+        async function loadConversations() {
+            try {
+                const response = await fetch('/api/conversations', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    conversations = await response.json();
+                    renderConversationList();
+                }
+            } catch (error) {
+                console.error('加载对话列表失败:', error);
+            }
+        }
+
+        // 渲染对话列表
+        function renderConversationList() {
+            const list = document.getElementById('conversationList');
+            list.innerHTML = '';
+
+            conversations.forEach(conv => {
+                const item = document.createElement('div');
+                item.className = 'conversation-item';
+                item.onclick = () => selectConversation(conv);
+                
+                item.innerHTML = `
+                    <div class="conversation-title">${conv.title}</div>
+                    <div class="conversation-meta">${conv.message_count} 条消息</div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+
+        // 选择对话
+        async function selectConversation(conversation) {
+            currentConversation = conversation;
+            document.getElementById('currentConversationTitle').textContent = conversation.title;
+            
+            // 加载消息
+            await loadMessages(conversation.id);
+            
+            // 更新选中状态
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.conversation-item').classList.add('active');
+        }
+
+        // 加载消息
+        async function loadMessages(conversationId) {
+            try {
+                const response = await fetch(`/api/conversations/${conversationId}/messages`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    messages = await response.json();
+                    renderMessages();
+                }
+            } catch (error) {
+                console.error('加载消息失败:', error);
+            }
+        }
+
+        // 渲染消息
+        function renderMessages() {
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = '';
+
+            messages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.textContent = message.author.charAt(0).toUpperCase();
+                
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                
+                const header = document.createElement('div');
+                header.className = 'message-header';
+                header.innerHTML = `
+                    <span class="message-author">${message.author}</span>
+                    <span class="message-timestamp">${new Date(message.timestamp).toLocaleString()}</span>
+                `;
+                
+                const text = document.createElement('div');
+                text.className = 'message-text';
+                text.textContent = message.content;
+                
+                content.appendChild(header);
+                content.appendChild(text);
+                
+                // 如果有干预消息
+                if (message.intervention) {
+                    const intervention = document.createElement('div');
+                    intervention.className = 'intervention-message';
+                    intervention.innerHTML = `
+                        <div class="strategy">TKI策略: ${message.strategy}</div>
+                        <div>${message.intervention}</div>
+                    `;
+                    content.appendChild(intervention);
+                }
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(content);
+                container.appendChild(messageDiv);
+            });
+            
+            // 滚动到底部
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 创建新对话
+        async function createNewConversation() {
+            try {
+                const response = await fetch('/api/conversations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ title: t('new_conversation_title') })
+                });
+
+                if (response.ok) {
+                    const conversation = await response.json();
+                    conversations.unshift(conversation);
+                    renderConversationList();
+                    selectConversation(conversation);
+                }
+            } catch (error) {
+                console.error('创建对话失败:', error);
+            }
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            if (!currentConversation) {
+                alert(t('no_conversation'));
+                return;
+            }
+
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            
+            if (!content) return;
+
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+
+            try {
+                const response = await fetch(`/api/conversations/${currentConversation.id}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        author: currentUser.username,
+                        gender: 'unknown'
+                    })
+                });
+
+                if (response.ok) {
+                    input.value = '';
+                    await loadMessages(currentConversation.id);
+                } else {
+                    const data = await response.json();
+                    alert(data.error || '发送失败');
+                }
+            } catch (error) {
+                console.error('发送消息失败:', error);
+                alert('发送失败，请重试');
+            } finally {
+                sendButton.disabled = false;
+            }
+        }
+
+        // 处理键盘事件
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // 显示对话列表
+        function showConversations() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // 显示分析报告
+        function showAnalysis() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+            
+            if (currentConversation) {
+                // 这里可以加载分析报告
+                alert(t('analysis_report') + ' - 功能开发中...');
+            } else {
+                alert(t('no_conversation'));
+            }
+        }
+
+        // 语言切换功能
+        async function switchLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            
+            // 更新按钮状态
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(lang + 'Btn').classList.add('active');
+            
+            // 加载翻译
+            await loadTranslations(lang);
+            
+            // 更新界面文本
+            updateUIText();
+        }
+
+        // 加载翻译
+        async function loadTranslations(lang) {
+            try {
+                const response = await fetch(`/api/translations/${lang}`);
+                translations = await response.json();
+            } catch (error) {
+                console.error('加载翻译失败:', error);
+            }
+        }
+
+        // 获取翻译文本
+        function t(key) {
+            return translations[key] || key;
+        }
+
+        // 更新界面文本
+        function updateUIText() {
+            // 更新页面标题
+            document.getElementById('pageTitle').textContent = t('page_title');
+            document.getElementById('appTitle').textContent = t('app_title');
+            document.getElementById('appSubtitle').textContent = t('app_subtitle');
+            
+            // 更新登录表单
+            document.getElementById('loginUsernameLabel').textContent = t('username');
+            document.getElementById('loginPasswordLabel').textContent = t('password');
+            document.getElementById('loginButton').textContent = t('login');
+            document.getElementById('noAccountText').textContent = t('no_account') + ' ';
+            document.getElementById('registerNowText').textContent = t('register_now');
+            
+            // 更新注册表单
+            document.getElementById('registerUsernameLabel').textContent = t('username');
+            document.getElementById('registerEmailLabel').textContent = t('email');
+            document.getElementById('registerPasswordLabel').textContent = t('password');
+            document.getElementById('inviteCodeLabel').textContent = t('invite_code');
+            document.getElementById('inviteCode').placeholder = t('invite_code_placeholder');
+            document.getElementById('registerButton').textContent = t('register');
+            document.getElementById('hasAccountText').textContent = t('has_account') + ' ';
+            document.getElementById('loginNowText').textContent = t('login_now');
+            
+            // 更新导航菜单
+            document.getElementById('conversationsNav').textContent = t('conversations');
+            document.getElementById('analysisNav').textContent = t('analysis');
+            document.getElementById('newConversationNav').textContent = t('new_conversation');
+            document.getElementById('settingsNav').textContent = t('settings');
+            
+            // 更新其他界面元素
+            document.getElementById('currentConversationTitle').textContent = t('select_conversation');
+            document.getElementById('messageInput').placeholder = t('message_placeholder');
+            document.getElementById('sendButton').title = t('send_message');
+        }
+
+        // 显示设置页面
+        function showSettings() {
+            alert('设置功能开发中...');
+        }
+
+        // 跳转到用户资料页面
+        function goToProfile() {
+            window.location.href = '/profile';
+        }
+
+        // 跳转到管理员面板
+        function goToAdmin() {
+            window.location.href = '/admin';
+        }
+
+        // 跳转到注册页面
+        function goToRegister() {
+            window.location.href = '/register';
+        }
+
+        // 页面加载时检查登录状态
+        window.onload = async function() {
+            // 加载保存的语言设置
+            const savedLanguage = localStorage.getItem('language') || 'zh';
+            await switchLanguage(savedLanguage);
+            
+            // 添加备用点击事件监听器
+            const registerLink = document.getElementById('registerNowText');
+            const loginLink = document.getElementById('loginNowText');
+            
+            if (registerLink) {
+                registerLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('注册链接被点击（事件监听器）');
+                    showRegister();
+                });
+            }
+            
+            if (loginLink) {
+                loginLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('登录链接被点击（事件监听器）');
+                    showLogin();
+                });
+            }
+            
+            const token = localStorage.getItem('token');
+            if (token) {
+                // 这里可以验证token有效性
+                showMainApp();
+            }
+        };
+    </script>
+</body>
+</html> 
