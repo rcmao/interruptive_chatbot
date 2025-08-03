@@ -818,6 +818,14 @@
                         <span class="channel-name" id="currentChannel">加载中...</span>
                         <span class="channel-description" id="channelDescription">TKI智能干预聊天机器人</span>
                     </div>
+                    <!-- 新增：当前打断风格显示 -->
+                    <div class="current-intervention-style" style="display: flex; align-items: center; gap: 8px; margin-left: 16px; padding: 6px 12px; background: #40444b; border-radius: 6px; border: 1px solid #40444b;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div class="style-indicator-dot" id="styleIndicatorDot" style="width: 10px; height: 10px; border-radius: 50%; background: #5865f2;"></div>
+                            <span style="font-size: 12px; color: #96989d;">当前风格:</span>
+                            <span style="font-size: 12px; color: #dcddde; font-weight: 500;" id="currentStyleText">协作型</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="chat-header-right">
                     <div class="search-bar">
@@ -947,6 +955,7 @@
             loadMessages();
             loadUsers();
             loadStats();
+            loadSavedInterventionStyle(); // 加载保存的风格
             
             // 页面初始化完成后，定期刷新成员列表
             setInterval(() => {
@@ -1146,6 +1155,12 @@
             socket.on('tki_style_updated', (data) => {
                 console.log('收到TKI风格更新:', data);
                 updateTKIStyleDisplay(data);
+            });
+
+            // 干预风格更新事件监听器
+            socket.on('intervention_style_updated', (data) => {
+                console.log('收到干预风格更新:', data);
+                updateCurrentInterventionStyle(data.style);
             });
 
             console.log('WebSocket事件监听器已设置完成');
@@ -1724,6 +1739,57 @@
             }
         }
         
+        // 更新当前干预风格显示
+        function updateCurrentInterventionStyle(style) {
+            const styleIndicatorDot = document.getElementById('styleIndicatorDot');
+            const currentStyleText = document.getElementById('currentStyleText');
+            
+            // 风格颜色映射
+            const styleColors = {
+                'auto': '#747f8d',      // 灰色
+                'collaborating': '#5865f2',  // 蓝色
+                'accommodating': '#57f287',  // 绿色
+                'competing': '#ed4245',      // 红色
+                'compromising': '#faa61a',   // 橙色
+                'avoiding': '#eb459e'        // 粉色
+            };
+            
+            // 风格显示名称映射
+            const styleNames = {
+                'auto': '自动选择',
+                'collaborating': '协作型',
+                'accommodating': '迁就型',
+                'competing': '竞争型',
+                'compromising': '妥协型',
+                'avoiding': '回避型'
+            };
+            
+            // 更新颜色和文本
+            if (styleIndicatorDot) {
+                styleIndicatorDot.style.background = styleColors[style] || styleColors['collaborating'];
+            }
+            
+            if (currentStyleText) {
+                currentStyleText.textContent = styleNames[style] || styleNames['collaborating'];
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('currentInterventionStyle', style);
+            
+            console.log(`干预风格已更新为: ${styleNames[style]}`);
+        }
+
+        // 加载保存的干预风格
+        function loadSavedInterventionStyle() {
+            const savedStyle = localStorage.getItem('currentInterventionStyle');
+            if (savedStyle) {
+                updateCurrentInterventionStyle(savedStyle);
+            } else {
+                // 默认风格
+                updateCurrentInterventionStyle('collaborating');
+            }
+        }
+
         // 显示通知消息
         function showNotification(message) {
             // 创建通知元素
