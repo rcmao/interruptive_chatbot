@@ -1536,98 +1536,81 @@ def get_live_conflict_detection():
 def generate_style_based_intervention(context_messages, trigger_type, style):
     """根据风格生成干预消息"""
     
-    style_prompts = {
-        'collaborating': {
-            'system': """你是协作型干预专家。你的目标是促进合作，整合不同观点，推动共识。
-在干预时，你应该：
-1. 承认各方的观点都有价值
-2. 寻找共同点和合作机会
-3. 鼓励建设性对话
-4. 帮助各方找到平衡点
-5. 使用温和但坚定的语气""",
-            'examples': [
-                "我注意到大家都有很好的观点。让我们试着找到一些共同点，看看能否整合这些想法。",
-                "我觉得我们可以从不同的角度来思考这个问题。也许我们可以一起探索一个大家都满意的解决方案。",
-                "我理解每个人的关切。让我们尝试一个协作的方式，确保每个人的声音都能被听到。"
-            ]
-        },
-        'accommodating': {
-            'system': """你是迁就型干预专家。你的目标是关系优先，安抚他人，减少冲突。
-在干预时，你应该：
-1. 优先维护和谐关系
-2. 用温和语气为弱势方缓颊
-3. 避免直接对抗
-4. 强调理解和包容
-5. 寻找和平解决方案""",
-            'examples': [
-                "我理解大家的感受。也许我们可以稍微放慢一下，给每个人更多表达的机会。",
-                "我觉得每个人都有表达的权利。让我们创造一个更包容的讨论环境。",
-                "我注意到有些观点可能被忽视了。让我们确保每个人都有机会分享自己的想法。"
-            ]
-        },
-        'competing': {
-            'system': """你是竞争型干预专家。你的目标是立场鲜明，为女性据理力争，正面对抗偏见。
-在干预时，你应该：
-1. 明确支持女性表达权
-2. 直接指出不公平行为
-3. 为女性观点辩护
-4. 挑战性别偏见
-5. 使用坚定有力的语气""",
-            'examples': [
-                "我注意到女性发言者经常被打断。每个人都有平等的表达权利，让我们尊重这一点。",
-                "我觉得这个观点很有价值，应该得到完整的表达机会。让我们听听完整的想法。",
-                "我不同意这种忽视女性观点的做法。每个人都有权被听到和尊重。"
-            ]
-        },
-        'compromising': {
-            'system': """你是妥协型干预专家。你的目标是平衡，保障每方都能发声，设置公平讨论机制。
-在干预时，你应该：
-1. 设置公平的发言规则
-2. 确保每个人都有机会
-3. 平衡各方利益
-4. 不参与观点评价
-5. 使用中性的语气""",
-            'examples': [
-                "让我们建立一个公平的讨论机制，确保每个人都有平等的发言时间。",
-                "我建议我们轮流发言，这样每个人都能完整表达自己的观点。",
-                "让我们暂停一下，给每个人一个完整的表达机会，然后再继续讨论。"
-            ]
-        },
-        'avoiding': {
-            'system': """你是回避型干预专家。你的目标是逃避冲突，绕开矛盾话题，表面轻松。
-在干预时，你应该：
-1. 转移注意力到其他话题
-2. 避免直接冲突
-3. 使用轻松的语气
-4. 寻找共同兴趣
-5. 缓解紧张气氛""",
-            'examples': [
-                "这个话题很有趣，不过我们也可以聊聊其他方面。",
-                "我觉得我们可以从不同的角度来思考这个问题。",
-                "让我们稍微放松一下，也许换个话题会更好。"
-            ]
-        }
+    # 导入GPT风格干预生成器
+    import sys
+    import os
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+    
+    from src.interventions.gpt_style_intervention_generator import (
+        GPTStyleInterventionGenerator, 
+        GPTInterventionContext, 
+        AdminInterventionStyle, 
+        InterventionTrigger
+    )
+    
+    # 初始化生成器
+    generator = GPTStyleInterventionGenerator()
+    
+    # 转换触发类型
+    trigger_mapping = {
+        'female_interrupted': InterventionTrigger.FEMALE_INTERRUPTED,
+        'female_ignored': InterventionTrigger.FEMALE_IGNORED,
+        'male_dominance': InterventionTrigger.MALE_DOMINANCE,
+        'male_consecutive': InterventionTrigger.MALE_CONSECUTIVE,
+        'gender_imbalance': InterventionTrigger.GENDER_IMBALANCE,
+        'expression_difficulty': InterventionTrigger.EXPRESSION_DIFFICULTY,
+        'aggressive_context': InterventionTrigger.AGGRESSIVE_CONTEXT
     }
     
-    # 获取当前风格的提示
-    style_info = style_prompts.get(style, style_prompts['collaborating'])
+    trigger_type_enum = trigger_mapping.get(trigger_type, InterventionTrigger.GENDER_IMBALANCE)
     
-    # 构建上下文
-    context_text = "\n".join([f"{msg['author']}: {msg['message']}" for msg in context_messages[-5:]])
+    # 转换风格
+    style_mapping = {
+        'collaborating': AdminInterventionStyle.COLLABORATING,
+        'accommodating': AdminInterventionStyle.ACCOMMODATING,
+        'competing': AdminInterventionStyle.COMPETING,
+        'compromising': AdminInterventionStyle.COMPROMISING,
+        'avoiding': AdminInterventionStyle.AVOIDING,
+        'auto': AdminInterventionStyle.AUTO
+    }
     
-    # 构建完整提示
-    full_prompt = f"""基于以下对话上下文和触发类型，生成一句符合{style}风格的干预消息：
-
-对话上下文：
-{context_text}
-
-触发类型：{trigger_type}
-
-{style_info['system']}
-
-请生成一句简洁、有效的干预消息，长度控制在50字以内。"""
-
-    return full_prompt, style_info['examples']
+    admin_style = style_mapping.get(style, AdminInterventionStyle.AUTO)
+    
+    # 分析参与者性别
+    female_participants = []
+    male_participants = []
+    
+    for msg in context_messages:
+        author = msg.get('author', '')
+        gender = msg.get('gender', 'unknown')
+        if gender == 'female' and author not in female_participants:
+            female_participants.append(author)
+        elif gender == 'male' and author not in male_participants:
+            male_participants.append(author)
+    
+    # 创建GPT干预上下文
+    context = GPTInterventionContext(
+        trigger_type=trigger_type_enum,
+        urgency_level=4,  # 默认中等紧急程度
+        confidence=0.8,   # 默认高置信度
+        recent_messages=context_messages,
+        female_participants=female_participants,
+        male_participants=male_participants,
+        admin_style=admin_style
+    )
+    
+    # 生成干预消息
+    import asyncio
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        intervention = loop.run_until_complete(generator.generate_intervention(context))
+        loop.close()
+        return intervention
+    except Exception as e:
+        print(f"GPT干预生成失败: {e}")
+        # 返回备用消息
+        return "让我们继续建设性的讨论。"
 
 
 if __name__ == '__main__':
