@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新Admin风格切换测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #36393f;
+            color: #dcddde;
+        }
+        .container {
+            background: #2f3136;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .tki-style-control-section {
+            background: #40444b;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .tki-style-control-section label {
+            font-weight: 500;
+            color: #dcddde;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .tki-style-control-section select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #40444b;
+            border-radius: 4px;
+            background: #2f3136;
+            color: #dcddde;
+            font-size: 14px;
+        }
+        .tki-style-control-section select:focus {
+            outline: none;
+            border-color: #5865f2;
+        }
+        .style-description {
+            color: #96989d;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 8px;
+            background: #2f3136;
+            border-radius: 4px;
+            border-left: 3px solid #5865f2;
+            margin-bottom: 12px;
+        }
+        .confirm-section {
+            display: none;
+            margin-top: 12px;
+        }
+        .confirm-section .confirm-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .confirm-section .confirm-info {
+            flex: 1;
+        }
+        .confirm-section .confirm-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-success {
+            background: #43b581;
+            color: white;
+        }
+        .btn-danger {
+            background: #f04747;
+            color: white;
+        }
+        .current-style-info {
+            background: #40444b;
+            border-radius: 6px;
+            padding: 16px;
+        }
+        .current-style-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .style-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #747f8d;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #43b581;
+            color: white;
+        }
+        .error {
+            background: #f04747;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>新Admin风格切换测试</h1>
+        
+        <div id="messageContainer"></div>
+        
+        <!-- TKI风格选择区域 -->
+        <div class="tki-style-control-section">
+            <label for="tkiStyleSelect">选择插话风格:</label>
+            <select id="tkiStyleSelect">
+                <option value="none">无插话</option>
+                <option value="auto">自动选择</option>
+                <option value="collaborating">协作型</option>
+                <option value="accommodating">迁就型</option>
+                <option value="competing">竞争型</option>
+                <option value="compromising">妥协型</option>
+                <option value="avoiding">回避型</option>
+            </select>
+            
+            <div id="tkiStyleDescription" class="style-description">
+                无插话 - AI不会进行任何干预
+            </div>
+            
+            <!-- 确认按钮区域 -->
+            <div class="confirm-section" id="styleConfirmSection">
+                <div class="confirm-content">
+                    <div class="confirm-info">
+                        <div style="font-size: 14px; color: #dcddde; margin-bottom: 4px;">确认应用风格:</div>
+                        <div style="font-size: 16px; font-weight: 600; color: #ffffff;" id="confirmStyleName">无插话</div>
+                    </div>
+                    <div class="confirm-buttons">
+                        <button class="btn btn-success" onclick="confirmStyleChange()">
+                            <i class="fas fa-check"></i>
+                            确定
+                        </button>
+                        <button class="btn btn-danger" onclick="cancelStyleChange()">
+                            <i class="fas fa-times"></i>
+                            取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 当前风格显示区域 -->
+        <div class="current-style-info">
+            <div class="current-style-header">
+                <div class="style-indicator"></div>
+                <strong>当前风格：</strong><span id="currentStyle" style="color: #ffffff; font-weight: 600;">无插话</span>
+            </div>
+            <div id="styleDescription" style="font-size: 12px; color: #96989d; line-height: 1.4;">
+                AI不会进行任何干预
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button class="btn btn-success" onclick="loadCurrentStyle()">刷新状态</button>
+        </div>
+    </div>
+
+    <script>
+        let currentInterventionStyle = 'none';
+        
+        // 初始化风格选择器
+        function initStyleSelector() {
+            const tkiStyleSelect = document.getElementById('tkiStyleSelect');
+            
+            tkiStyleSelect.addEventListener('change', function() {
+                const selectedStyle = this.value;
+                const selectedOption = this.options[this.selectedIndex];
+                
+                // 更新风格描述
+                updateTkiStyleDescription(selectedStyle);
+                
+                // 显示确认按钮
+                document.getElementById('styleConfirmSection').style.display = 'block';
+                document.getElementById('confirmStyleName').textContent = selectedOption.text;
+            });
+        }
+        
+        // 更新TKI风格描述
+        function updateTkiStyleDescription(style) {
+            const styleDescriptions = {
+                'none': '无插话 - AI不会进行任何干预',
+                'auto': '自动选择 - 根据触发类型和紧急程度自动选择最佳风格',
+                'collaborating': '协作型 - 促进合作，整合不同观点，推动共识',
+                'accommodating': '迁就型 - 关系优先，安抚他人，减少冲突',
+                'competing': '竞争型 - 立场鲜明，为女性据理力争',
+                'compromising': '妥协型 - 平衡，保障每方都能发声',
+                'avoiding': '回避型 - 逃避冲突，绕开矛盾话题'
+            };
+            
+            const descriptionEl = document.getElementById('tkiStyleDescription');
+            if (descriptionEl) {
+                descriptionEl.textContent = styleDescriptions[style] || styleDescriptions['none'];
+            }
+        }
+        
+        // 确认风格变更
+        function confirmStyleChange() {
+            const tkiStyleSelect = document.getElementById('tkiStyleSelect');
+            const selectedStyle = tkiStyleSelect.value;
+            const selectedOption = tkiStyleSelect.options[tkiStyleSelect.selectedIndex];
+            
+            // 发送风格更新到服务器
+            updateInterventionStyle(selectedStyle);
+            
+            // 隐藏确认按钮
+            document.getElementById('styleConfirmSection').style.display = 'none';
+            
+            showMessage(`干预风格已更新为: ${selectedOption.text}`, 'success');
+        }
+        
+        // 取消风格变更
+        function cancelStyleChange() {
+            // 隐藏确认按钮
+            document.getElementById('styleConfirmSection').style.display = 'none';
+            
+            // 恢复到当前实际应用的风格
+            loadCurrentStyle();
+        }
+        
+        // 更新干预风格
+        function updateInterventionStyle(style) {
+            fetch('/api/admin/intervention-style', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    style: style
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(`干预风格已更新为: ${style}`, 'success');
+                    currentInterventionStyle = style;
+                    loadCurrentStyle();
+                } else {
+                    showMessage('风格更新失败: ' + (data.error || '未知错误'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating intervention style:', error);
+                showMessage('风格更新失败: ' + error.message, 'error');
+            });
+        }
+        
+        // 加载当前风格
+        function loadCurrentStyle() {
+            fetch('/api/admin/current-intervention-style')
+                .then(response => response.json())
+                .then(data => {
+                    const style = data.style || 'none';
+                    currentInterventionStyle = style;
+                    
+                    // 更新UI显示
+                    updateCurrentStyleInfo(style);
+                    updateTkiStyleDescription(style);
+                    
+                    // 设置下拉框的选中状态
+                    const tkiStyleSelect = document.getElementById('tkiStyleSelect');
+                    if (tkiStyleSelect) {
+                        tkiStyleSelect.value = style;
+                    }
+                    
+                    console.log(`当前干预风格已加载: ${style}`);
+                })
+                .catch(error => {
+                    console.error('Error loading current intervention style:', error);
+                    showMessage('加载当前风格失败: ' + error.message, 'error');
+                });
+        }
+        
+        // 更新当前风格信息
+        function updateCurrentStyleInfo(style) {
+            const styleInfo = {
+                'none': {
+                    name: '无插话',
+                    description: 'AI不会进行任何干预'
+                },
+                'auto': {
+                    name: '自动选择',
+                    description: '根据触发类型和紧急程度自动选择最佳风格'
+                },
+                'collaborating': {
+                    name: '协作型',
+                    description: '促进合作，整合不同观点，推动共识'
+                },
+                'accommodating': {
+                    name: '迁就型',
+                    description: '关系优先，安抚他人，减少冲突'
+                },
+                'competing': {
+                    name: '竞争型',
+                    description: '立场鲜明，为女性据理力争'
+                },
+                'compromising': {
+                    name: '妥协型',
+                    description: '平衡，保障每方都能发声'
+                },
+                'avoiding': {
+                    name: '回避型',
+                    description: '逃避冲突，绕开矛盾话题'
+                }
+            };
+            
+            const info = styleInfo[style] || styleInfo['none'];
+            const currentStyleElement = document.getElementById('currentStyle');
+            const styleDescriptionElement = document.getElementById('styleDescription');
+            
+            if (currentStyleElement) {
+                currentStyleElement.textContent = info.name;
+            }
+            if (styleDescriptionElement) {
+                styleDescriptionElement.textContent = info.description;
+            }
+        }
+        
+        // 显示消息
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            container.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initStyleSelector();
+            loadCurrentStyle();
+        });
+    </script>
+</body>
+</html> 

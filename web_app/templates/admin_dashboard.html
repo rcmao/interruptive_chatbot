@@ -187,6 +187,10 @@
             background: #5865f2;
             color: white;
         }
+        
+        .style-option.selected .style-dot {
+            border-color: #ffffff !important;
+        }
 
         .style-name {
             font-weight: 600;
@@ -647,89 +651,58 @@
                     干预风格控制
                 </div>
                 
-                <div class="style-selector" id="styleSelector">
-                    <div class="style-option" data-style="auto">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div class="style-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #747f8d;"></div>
-                            <div>
-                                <div class="style-name">自动选择</div>
-                                <div class="style-description">根据触发类型自动选择最佳风格</div>
-                            </div>
-                        </div>
+                <!-- TKI风格选择区域 -->
+                <div class="tki-style-control-section" style="background: #40444b; border-radius: 6px; padding: 16px; margin-bottom: 16px;">
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-weight: 500; color: #dcddde; display: block; margin-bottom: 8px;">选择插话风格:</label>
+                        <select id="tkiStyleSelect" style="width: 100%; padding: 8px 12px; border: 1px solid #40444b; border-radius: 4px; background: #2f3136; color: #dcddde; font-size: 14px;">
+                            <option value="none">无插话</option>
+                            <option value="auto">自动选择</option>
+                            <option value="collaborating">协作型</option>
+                            <option value="accommodating">迁就型</option>
+                            <option value="competing">竞争型</option>
+                            <option value="compromising">妥协型</option>
+                            <option value="avoiding">回避型</option>
+                        </select>
                     </div>
-                    <div class="style-option selected" data-style="collaborating">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div class="style-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #5865f2;"></div>
-                            <div>
-                                <div class="style-name">协作型</div>
-                                <div class="style-description">促进合作，整合不同观点，推动共识</div>
-                            </div>
-                        </div>
+                    
+                    <div id="tkiStyleDescription" style="color: #96989d; font-size: 12px; line-height: 1.4; padding: 8px; background: #2f3136; border-radius: 4px; border-left: 3px solid #5865f2; margin-bottom: 12px;">
+                        无插话 - AI不会进行任何干预
                     </div>
-                    <div class="style-option" data-style="accommodating">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div class="style-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #57f287;"></div>
-                            <div>
-                                <div class="style-name">迁就型</div>
-                                <div class="style-description">关系优先，安抚他人，减少冲突</div>
+                    
+                    <!-- 确认按钮区域 -->
+                    <div class="style-confirm-section" style="display: none;" id="styleConfirmSection">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 14px; color: #dcddde; margin-bottom: 4px;">确认应用风格:</div>
+                                <div style="font-size: 16px; font-weight: 600; color: #ffffff;" id="confirmStyleName">无插话</div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="style-option" data-style="competing">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div class="style-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #ed4245;"></div>
-                            <div>
-                                <div class="style-name">竞争型</div>
-                                <div class="style-description">立场鲜明，为女性据理力争</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="style-option" data-style="compromising">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div class="style-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #faa61a;"></div>
-                            <div>
-                                <div class="style-name">妥协型</div>
-                                <div class="style-description">平衡，保障每方都能发声</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="style-option" data-style="avoiding">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div class="style-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #eb459e;"></div>
-                            <div>
-                                <div class="style-name">回避型</div>
-                                <div class="style-description">逃避冲突，绕开矛盾话题</div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="action-btn" onclick="confirmStyleChange()" style="background: #43b581; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                                    <i class="fas fa-check"></i>
+                                    确定
+                                </button>
+                                <button class="action-btn" onclick="cancelStyleChange()" style="background: #f04747; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                                    <i class="fas fa-times"></i>
+                                    取消
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 新增：确定按钮 -->
-                <div class="style-confirm-section" style="margin-top: 16px; padding: 12px; background: #40444b; border-radius: 6px; display: none;" id="styleConfirmSection">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="flex: 1;">
-                            <div style="font-size: 14px; color: #dcddde; margin-bottom: 4px;">确认应用风格:</div>
-                            <div style="font-size: 16px; font-weight: 600; color: #ffffff;" id="confirmStyleName">协作型</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="action-btn" onclick="confirmStyleChange()" style="background: #43b581; color: white;">
-                                <i class="fas fa-check"></i>
-                                确定
-                            </button>
-                            <button class="action-btn" onclick="cancelStyleChange()" style="background: #f04747; color: white;">
-                                <i class="fas fa-times"></i>
-                                取消
-                            </button>
-                        </div>
+                <!-- 当前风格显示区域 -->
+                <div id="currentStyleInfo" style="background: #40444b; border-radius: 6px; padding: 16px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #747f8d;"></div>
+                        <strong style="color: #dcddde;">当前风格：</strong><span id="currentStyle" style="color: #ffffff; font-weight: 600;">无插话</span>
+                    </div>
+                    <div id="styleDescription" style="font-size: 12px; color: #96989d; line-height: 1.4;">
+                        AI不会进行任何干预
                     </div>
                 </div>
                 
-                <div id="currentStyleInfo" style="margin-top: 16px; padding: 12px; background: #40444b; border-radius: 6px;">
-                    <strong>当前风格：</strong><span id="currentStyle">协作型</span>
-                    <div id="styleDescription" style="margin-top: 8px; font-size: 12px; color: #96989d;">
-                        促进合作，整合不同观点，推动共识
-                    </div>
-                </div>
+
             </div>
                     </div>
                 </div>
@@ -978,16 +951,27 @@
                 .then(data => {
                     if (data.status === 'active') {
                         // 更新冲突检测指标
-                        document.getElementById('totalAnalyses').textContent = data.total_analyses || 0;
-                        document.getElementById('recentInterventions').textContent = data.recent_interventions || 0;
-                        document.getElementById('activeContexts').textContent = data.active_contexts || 0;
+                        const totalAnalysesEl = document.getElementById('totalAnalyses');
+                        const recentInterventionsEl = document.getElementById('recentInterventions');
+                        const activeContextsEl = document.getElementById('activeContexts');
+                        const triggerTypesEl = document.getElementById('triggerTypes');
+                        
+                        if (totalAnalysesEl) totalAnalysesEl.textContent = data.total_analyses || 0;
+                        if (recentInterventionsEl) recentInterventionsEl.textContent = data.recent_interventions || 0;
+                        if (activeContextsEl) activeContextsEl.textContent = data.active_contexts || 0;
                         
                         // 更新触发类型
-                        const triggerTypes = Object.keys(data.trigger_counts || {}).join(', ');
-                        document.getElementById('triggerTypes').textContent = triggerTypes || '--';
+                        if (triggerTypesEl) {
+                            const triggerTypes = Object.keys(data.trigger_counts || {}).join(', ');
+                            triggerTypesEl.textContent = triggerTypes || '--';
+                        }
                         
                         // 更新最近干预记录
                         updateRecentInterventionsList(data.recent_interventions_list || []);
+                        
+                        console.log('实时冲突检测数据已更新:', data);
+                    } else if (data.status === 'error') {
+                        console.error('实时冲突检测错误:', data.error);
                     }
                 })
                 .catch(error => {
@@ -1134,31 +1118,44 @@
 
         // 风格选择功能
         function initStyleSelector() {
-            const styleOptions = document.querySelectorAll('.style-option');
+            const tkiStyleSelect = document.getElementById('tkiStyleSelect');
             
-            styleOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // 移除所有选中状态
-                    styleOptions.forEach(opt => opt.classList.remove('selected'));
-                    
-                    // 添加选中状态
-                    this.classList.add('selected');
-                    
-                    // 更新当前风格显示（临时）
-                    const style = this.dataset.style;
-                    updateCurrentStyleInfo(style);
-                    
-                    // 显示确认按钮
-                    document.getElementById('styleConfirmSection').style.display = 'block';
-                    document.getElementById('confirmStyleName').textContent = this.querySelector('.style-name').textContent;
-                });
+            tkiStyleSelect.addEventListener('change', function() {
+                const selectedStyle = this.value;
+                const selectedOption = this.options[this.selectedIndex];
+                
+                // 更新风格描述
+                updateTkiStyleDescription(selectedStyle);
+                
+                // 显示确认按钮
+                document.getElementById('styleConfirmSection').style.display = 'block';
+                document.getElementById('confirmStyleName').textContent = selectedOption.text;
             });
+        }
+        
+        // 更新TKI风格描述
+        function updateTkiStyleDescription(style) {
+            const styleDescriptions = {
+                'none': '无插话 - AI不会进行任何干预',
+                'auto': '自动选择 - 根据触发类型和紧急程度自动选择最佳风格',
+                'collaborating': '协作型 - 促进合作，整合不同观点，推动共识',
+                'accommodating': '迁就型 - 关系优先，安抚他人，减少冲突',
+                'competing': '竞争型 - 立场鲜明，为女性据理力争',
+                'compromising': '妥协型 - 平衡，保障每方都能发声',
+                'avoiding': '回避型 - 逃避冲突，绕开矛盾话题'
+            };
+            
+            const descriptionEl = document.getElementById('tkiStyleDescription');
+            if (descriptionEl) {
+                descriptionEl.textContent = styleDescriptions[style] || styleDescriptions['none'];
+            }
         }
 
         // 确认风格变更
         function confirmStyleChange() {
-            const selectedOption = document.querySelector('.style-option.selected');
-            const selectedStyle = selectedOption.dataset.style;
+            const tkiStyleSelect = document.getElementById('tkiStyleSelect');
+            const selectedStyle = tkiStyleSelect.value;
+            const selectedOption = tkiStyleSelect.options[tkiStyleSelect.selectedIndex];
             
             // 发送风格更新到服务器
             updateInterventionStyle(selectedStyle);
@@ -1166,7 +1163,7 @@
             // 隐藏确认按钮
             document.getElementById('styleConfirmSection').style.display = 'none';
             
-            showMessage(`干预风格已更新为: ${selectedOption.querySelector('.style-name').textContent}`, 'success');
+            showMessage(`干预风格已更新为: ${selectedOption.text}`, 'success');
         }
 
         // 取消风格变更
@@ -1181,6 +1178,10 @@
         // 更新当前风格信息
         function updateCurrentStyleInfo(style) {
             const styleInfo = {
+                'none': {
+                    name: '无插话',
+                    description: 'AI不会进行任何干预'
+                },
                 'auto': {
                     name: '自动选择',
                     description: '根据触发类型和紧急程度自动选择最佳风格'
@@ -1207,7 +1208,7 @@
                 }
             };
             
-            const info = styleInfo[style] || styleInfo['collaborating'];
+            const info = styleInfo[style] || styleInfo['none'];
             const currentStyleElement = document.getElementById('currentStyle');
             const styleDescriptionElement = document.getElementById('styleDescription');
             
@@ -1251,38 +1252,34 @@
             fetch('/api/admin/current-intervention-style')
                 .then(response => response.json())
                 .then(data => {
-                    const style = data.style || 'collaborating';
+                    const style = data.style || 'none';
                     currentInterventionStyle = style;
                     
                     // 更新UI显示
                     updateCurrentStyleInfo(style);
+                    updateTkiStyleDescription(style);
                     
-                    // 设置正确的选中状态
-                    const styleOptions = document.querySelectorAll('.style-option');
-                    styleOptions.forEach(option => {
-                        option.classList.remove('selected');
-                        if (option.dataset.style === style) {
-                            option.classList.add('selected');
-                        }
-                    });
+                    // 设置下拉框的选中状态
+                    const tkiStyleSelect = document.getElementById('tkiStyleSelect');
+                    if (tkiStyleSelect) {
+                        tkiStyleSelect.value = style;
+                    }
                     
                     console.log(`当前干预风格已加载: ${style}`);
                 })
                 .catch(error => {
                     console.error('Error loading current intervention style:', error);
                     // 使用默认风格
-                    const defaultStyle = 'collaborating';
+                    const defaultStyle = 'none';
                     currentInterventionStyle = defaultStyle;
                     updateCurrentStyleInfo(defaultStyle);
+                    updateTkiStyleDescription(defaultStyle);
                     
-                    // 设置默认选中状态
-                    const styleOptions = document.querySelectorAll('.style-option');
-                    styleOptions.forEach(option => {
-                        option.classList.remove('selected');
-                        if (option.dataset.style === defaultStyle) {
-                            option.classList.add('selected');
-                        }
-                    });
+                    // 设置下拉框的默认选中状态
+                    const tkiStyleSelect = document.getElementById('tkiStyleSelect');
+                    if (tkiStyleSelect) {
+                        tkiStyleSelect.value = defaultStyle;
+                    }
                 });
         }
 
