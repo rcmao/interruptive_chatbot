@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">TKI性别意识智能干预聊天机器人</title>
+    <title id="pageTitle">聊天室系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -180,19 +180,7 @@
             line-height: 1.4;
         }
 
-        .intervention-message {
-            background: rgba(255, 193, 7, 0.1);
-            border-left: 4px solid #ffc107;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
-        }
 
-        .intervention-message .strategy {
-            font-weight: 600;
-            color: #ffc107;
-            margin-bottom: 5px;
-        }
 
         .chat-input {
             padding: 20px;
@@ -468,8 +456,8 @@
 <body>
     <!-- 登录/注册界面 -->
     <div id="authContainer" class="auth-container">
-        <h1><i class="fas fa-robot"></i> <span id="appTitle">TKI智能干预机器人</span></h1>
-        <p style="color: #666; margin-bottom: 30px;" id="appSubtitle">基于Thomas-Kilmann冲突管理模型的性别结构性边缘化干预系统</p>
+        <h1><i class="fas fa-comments"></i> <span id="appTitle">聊天室系统</span></h1>
+<p style="color: #666; margin-bottom: 30px;" id="appSubtitle">简单易用的在线聊天室系统</p>
         
         <div id="loginForm">
             <div class="form-group">
@@ -520,7 +508,7 @@
         <!-- 侧边栏 -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-robot"></i> TKI机器人</h2>
+                <h2><i class="fas fa-comments"></i> 聊天室</h2>
             </div>
             
             <div class="sidebar-nav">
@@ -856,15 +844,7 @@
                 content.appendChild(text);
                 
                 // 如果有干预消息
-                if (message.intervention) {
-                    const intervention = document.createElement('div');
-                    intervention.className = 'intervention-message';
-                    intervention.innerHTML = `
-                        <div class="strategy">TKI策略: ${message.strategy}</div>
-                        <div>${message.intervention}</div>
-                    `;
-                    content.appendChild(intervention);
-                }
+
                 
                 messageDiv.appendChild(avatar);
                 messageDiv.appendChild(content);

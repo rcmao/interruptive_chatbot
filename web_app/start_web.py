@@ -46,7 +46,7 @@ def create_default_data():
         test1_user = User.query.filter_by(username='test1_m').first()
         if not test1_user:
             test1_user = User(
-                username='test1m',
+                username='test1_m',
                 email='test1_m@tki.com',
                 password_hash=generate_password_hash('test123'),
                 role='member',
@@ -54,6 +54,8 @@ def create_default_data():
             )
             db.session.add(test1_user)
             print("✅ 创建测试用户1: test1_m/test123 (男)")
+        else:
+            print("✅ 测试用户1已存在: test1_m/test123 (男)")
 
         # 创建test2_m用户
         test2_user = User.query.filter_by(username='test2_m').first()
@@ -67,6 +69,8 @@ def create_default_data():
             )
             db.session.add(test2_user)
             print("✅ 创建测试用户2: test2_m/test123 (男)")
+        else:
+            print("✅ 测试用户2已存在: test2_m/test123 (男)")
 
         # 只在数据库完全为空时创建默认房间
         room_count = Room.query.count()

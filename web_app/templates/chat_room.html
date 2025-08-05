@@ -254,20 +254,7 @@
             white-space: pre-wrap;
         }
 
-        .intervention-message {
-            background: rgba(255, 193, 7, 0.1);
-            border-left: 4px solid #ffc107;
-            padding: 12px;
-            margin-top: 8px;
-            border-radius: 4px;
-        }
 
-        .intervention-message .strategy {
-            font-weight: 600;
-            color: #ffc107;
-            margin-bottom: 4px;
-            font-size: 12px;
-        }
 
         .chat-input {
             padding: 16px;
@@ -810,32 +797,7 @@
                 </div>
             </div>
             
-            <!-- TKI控制面板 - 仅管理员可见 -->
-            <div class="tki-control-panel" id="tkiControlPanel" style="display: none;">
-                <div class="tki-panel-header">
-                    <i class="fas fa-robot"></i>
-                    <span>TKI插话风格控制</span>
-                </div>
-                <div class="tki-panel-content">
-                    <div class="tki-style-selector">
-                        <label for="tkiStyle">选择插话风格:</label>
-                        <select id="tkiStyle" onchange="onTKIStyleChange()">
-                            <option value="none">无插话</option>
-                            <option value="collaborating">协作型</option>
-                            <option value="accommodating">迁就型</option>
-                            <option value="competing">竞争型</option>
-                            <option value="compromising">妥协型</option>
-                            <option value="avoiding">回避型</option>
-                        </select>
-                    </div>
-                    <div class="tki-style-description" id="tkiStyleDescription">
-                        选择TKI插话风格来控制AI的干预行为
-                    </div>
-                    <button class="tki-confirm-button" id="tkiConfirmButton" onclick="confirmTKIStyleChange()" disabled>
-                        确认更换TKI插话风格
-                    </button>
-                </div>
-            </div>
+            
         </div>
 
         <!-- 主聊天区域 -->
@@ -845,15 +807,7 @@
                     <div class="channel-info">
                         <span class="channel-hash">#</span>
                         <span class="channel-name" id="currentChannel">加载中...</span>
-                        <span class="channel-description" id="channelDescription">TKI智能干预聊天机器人</span>
-                    </div>
-                    <!-- 新增：当前打断风格显示 -->
-                    <div class="current-intervention-style" style="display: flex; align-items: center; gap: 8px; margin-left: 16px; padding: 6px 12px; background: #40444b; border-radius: 6px; border: 1px solid #40444b;">
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <div class="style-indicator-dot" id="styleIndicatorDot" style="width: 10px; height: 10px; border-radius: 50%; background: #5865f2;"></div>
-                            <span style="font-size: 12px; color: #96989d;">当前风格:</span>
-                            <span style="font-size: 12px; color: #dcddde; font-weight: 500;" id="currentStyleText">协作型</span>
-                        </div>
+                        <span class="channel-description" id="channelDescription">聊天室</span>
                     </div>
                 </div>
                 <div class="chat-header-right">
@@ -921,10 +875,7 @@
             <span class="stats-label">检测到打断:</span>
             <span class="stats-value" id="interruptions">0次</span>
         </div>
-        <div class="stats-item">
-            <span class="stats-label">干预次数:</span>
-            <span class="stats-value" id="interventions">0次</span>
-                </div>
+        
             </div>
             -->
         </div>
@@ -949,8 +900,7 @@
             totalMessages: 0,
             femaleMessages: 0,
             maleMessages: 0,
-            interruptions: 0,
-            interventions: 0
+            interruptions: 0
         };
 
         // 获取房间ID
@@ -985,13 +935,7 @@
             loadUsers();
             loadStats();
             
-            // 加载保存的风格并同步TKI控制面板
-            loadSavedInterventionStyle().then(() => {
-                // 确保风格显示在页面加载时正确显示
-                setTimeout(() => {
-                    loadSavedInterventionStyle();
-                }, 1000);
-            });
+
             
             // 页面初始化完成后，定期刷新成员列表
             setInterval(() => {
@@ -1056,20 +1000,13 @@
             const sidebarAvatarElement = document.getElementById('sidebarUserAvatar');
             const sidebarNameElement = document.getElementById('sidebarUserName');
             const sidebarInitialElement = document.getElementById('sidebarUserInitial');
-            const tkiControlPanel = document.getElementById('tkiControlPanel');
             
             if (sidebarAvatarElement && sidebarNameElement && sidebarInitialElement) {
                 // 更新用户名
                 const displayName = currentUser.display_name || currentUser.username;
                 sidebarNameElement.textContent = displayName;
                 
-                // 如果是管理员，显示TKI控制面板
-                if (currentUser.role === 'admin' && tkiControlPanel) {
-                    tkiControlPanel.style.display = 'block';
-                    console.log('显示TKI控制面板 - 管理员权限');
-                } else if (tkiControlPanel) {
-                    tkiControlPanel.style.display = 'none';
-                }
+
                 
                 // 更新头像
                 if (currentUser.avatar) {
@@ -1176,35 +1113,9 @@
                 console.log('loadUsers()调用完成');
             });
 
-            socket.on('intervention', (data) => {
-                console.log('收到干预消息:', data);
-                addIntervention(data);
-                updateStats();
-            });
-
             // 测试事件监听器（已移除弹窗）
             socket.on('test', (data) => {
                 console.log('收到测试消息:', data);
-            });
-            
-            // TKI风格更新事件监听器（房间内广播）
-            socket.on('tki_style_updated', (data) => {
-                console.log('收到TKI风格更新:', data);
-                updateTKIStyleDisplay(data);
-                // 同时更新当前风格显示
-                updateCurrentInterventionStyle(data.style);
-            });
-
-            // 干预风格更新事件监听器（全局广播）
-            socket.on('intervention_style_updated', (data) => {
-                console.log('收到干预风格更新:', data);
-                updateCurrentInterventionStyle(data.style);
-                // 同时同步TKI控制面板（仅管理员可见）
-                const tkiStyleSelect = document.getElementById('tkiStyle');
-                if (tkiStyleSelect && currentUser && currentUser.role === 'admin') {
-                    tkiStyleSelect.value = data.style;
-                    onTKIStyleChange();
-                }
             });
 
             console.log('WebSocket事件监听器已设置完成');
@@ -1348,67 +1259,7 @@
             }
         }
 
-        // 添加干预消息
-        function addIntervention(data) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const interventionDiv = document.createElement('div');
-            interventionDiv.className = 'message';
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.innerHTML = '<i class="fas fa-robot"></i>';
-            
-            const content = document.createElement('div');
-            content.className = 'message-content';
-            
-            const header = document.createElement('div');
-            header.className = 'message-header';
-            
-            const author = document.createElement('span');
-            author.className = 'message-author';
-            author.textContent = 'TKI干预机器人';
-            
-            const timestamp = document.createElement('span');
-            timestamp.className = 'message-timestamp';
-            // 显示本地时间，格式为 HH:MM:SS
-            const localTime = new Date(data.timestamp).toLocaleTimeString('zh-CN', {
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            timestamp.textContent = localTime;
-            
-            header.appendChild(author);
-            header.appendChild(timestamp);
-            
-            const interventionContent = document.createElement('div');
-            interventionContent.className = 'intervention-message';
-            
-            const strategy = document.createElement('div');
-            strategy.className = 'strategy';
-            strategy.textContent = `干预策略: ${data.strategy}`;
-            
-            const text = document.createElement('div');
-            text.className = 'message-text';
-            text.textContent = data.text;
-            
-            interventionContent.appendChild(strategy);
-            interventionContent.appendChild(text);
-            
-            content.appendChild(header);
-            content.appendChild(interventionContent);
-            
-            interventionDiv.appendChild(avatar);
-            interventionDiv.appendChild(content);
-            
-            messagesContainer.appendChild(interventionDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
-            // 更新统计
-            stats.interventions++;
-            updateStats();
-        }
+
 
         // 加载消息历史
         async function loadMessages() {
@@ -1697,8 +1548,7 @@
                     totalMessages: 0,
                     femaleMessages: 0,
                     maleMessages: 0,
-                    interruptions: 0,
-                    interventions: 0
+                    interruptions: 0
                 };
             }
         }
@@ -1710,7 +1560,6 @@
                 const femaleMessagesEl = document.getElementById('femaleMessages');
                 const maleMessagesEl = document.getElementById('maleMessages');
                 const interruptionsEl = document.getElementById('interruptions');
-                const interventionsEl = document.getElementById('interventions');
                 
                 if (totalMessagesEl) totalMessagesEl.textContent = stats.totalMessages;
                 if (femaleMessagesEl) femaleMessagesEl.textContent = 
@@ -1718,7 +1567,6 @@
                 if (maleMessagesEl) maleMessagesEl.textContent = 
                 `${stats.maleMessages} (${stats.malePercentage || 0}%)`;
                 if (interruptionsEl) interruptionsEl.textContent = `${stats.interruptions}次`;
-                if (interventionsEl) interventionsEl.textContent = `${stats.interventions}次`;
             } catch (error) {
                 console.log('更新统计显示时出错:', error);
             }
@@ -1734,182 +1582,11 @@
             }
         }
 
-        // TKI风格选择变化处理函数
-        function onTKIStyleChange() {
-            const tkiStyle = document.getElementById('tkiStyle').value;
-            const descriptionEl = document.getElementById('tkiStyleDescription');
-            const confirmButton = document.getElementById('tkiConfirmButton');
-            
-            // 定义各种风格的描述
-            const styleDescriptions = {
-                'none': '无插话 - AI不会进行任何干预',
-                'collaborating': '协作型 - 整合各方观点，推动共识，平衡支持女性表达与维护群体和谐',
-                'accommodating': '迁就型 - 优先维护和谐，用温和语气为女性缓颊，避免冲突',
-                'competing': '竞争型 - 强势捍卫女性表达权，正面对抗偏见，可能激化冲突',
-                'compromising': '妥协型 - 设置公平讨论机制，保障发言机会，不参与观点评价',
-                'avoiding': '回避型 - 岔开矛盾话题，表面轻松，实则削弱女性表达机会'
-            };
-            
-            // 更新描述
-            if (descriptionEl) {
-                descriptionEl.textContent = styleDescriptions[tkiStyle] || '选择TKI插话风格来控制AI的干预行为';
-            }
-            
-            // 启用确认按钮
-            if (confirmButton) {
-                confirmButton.disabled = false;
-                confirmButton.textContent = `确认更换为: ${document.getElementById('tkiStyle').options[document.getElementById('tkiStyle').selectedIndex].text}`;
-            }
-        }
-        
-        // TKI风格确认函数
-        function confirmTKIStyleChange() {
-            const tkiStyle = document.getElementById('tkiStyle').value;
-            const confirmButton = document.getElementById('tkiConfirmButton');
-            
-            // 禁用确认按钮，防止重复点击
-            if (confirmButton) {
-                confirmButton.disabled = true;
-                confirmButton.textContent = '正在更新...';
-            }
-            
-            // 发送风格选择到后端
-            if (socket) {
-                socket.emit('tki_style_change', {
-                    room: String(currentRoomId),
-                    style: tkiStyle
-                });
-                console.log('TKI风格已确认更改为:', tkiStyle);
-            }
-            
-            // 立即更新当前风格显示
-            updateCurrentInterventionStyle(tkiStyle);
-            
-            // 显示确认消息
-            showNotification(`TKI风格已成功设置为: ${document.getElementById('tkiStyle').options[document.getElementById('tkiStyle').selectedIndex].text}`);
-            
-            // 重置确认按钮
-            setTimeout(() => {
-                if (confirmButton) {
-                    confirmButton.textContent = '确认更换TKI插话风格';
-                    confirmButton.disabled = false;
-                }
-            }, 2000);
-        }
-        
-        // 更新TKI风格显示
-        function updateTKIStyleDisplay(data) {
-            const tkiStyleSelect = document.getElementById('tkiStyle');
-            const descriptionEl = document.getElementById('tkiStyleDescription');
-            
-            if (tkiStyleSelect && descriptionEl) {
-                // 更新选择框
-                tkiStyleSelect.value = data.style;
-                
-                // 更新描述
-                descriptionEl.textContent = data.description;
-                
-                console.log('TKI风格显示已更新:', data.style);
-            }
-        }
-        
-        // 更新当前干预风格显示
-        function updateCurrentInterventionStyle(style) {
-            const styleIndicatorDot = document.getElementById('styleIndicatorDot');
-            const currentStyleText = document.getElementById('currentStyleText');
-            
-            // 风格颜色映射
-            const styleColors = {
-                'none': '#747f8d',      // 灰色
-                'auto': '#747f8d',      // 灰色
-                'collaborating': '#5865f2',  // 蓝色
-                'accommodating': '#57f287',  // 绿色
-                'competing': '#ed4245',      // 红色
-                'compromising': '#faa61a',   // 橙色
-                'avoiding': '#eb459e'        // 粉色
-            };
-            
-            // 风格显示名称映射
-            const styleNames = {
-                'none': '无插话',
-                'auto': '自动选择',
-                'collaborating': '协作型',
-                'accommodating': '迁就型',
-                'competing': '竞争型',
-                'compromising': '妥协型',
-                'avoiding': '回避型'
-            };
-            
-            // 更新颜色和文本
-            if (styleIndicatorDot) {
-                styleIndicatorDot.style.background = styleColors[style] || styleColors['collaborating'];
-            }
-            
-            if (currentStyleText) {
-                currentStyleText.textContent = styleNames[style] || styleNames['collaborating'];
-            }
-            
-            // 保存到本地存储
-            localStorage.setItem('currentInterventionStyle', style);
-            
-            console.log(`干预风格已更新为: ${styleNames[style]}`);
-        }
 
-        // 加载保存的干预风格
-        function loadSavedInterventionStyle() {
-            return new Promise((resolve) => {
-                // 首先从服务器获取当前风格
-                fetch('/api/admin/current-intervention-style')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const serverStyle = data.style || 'collaborating';
-                        updateCurrentInterventionStyle(serverStyle);
-                        
-                        // 同步TKI控制面板的选择（仅管理员可见）
-                        const tkiStyleSelect = document.getElementById('tkiStyle');
-                        if (tkiStyleSelect && currentUser && currentUser.role === 'admin') {
-                            tkiStyleSelect.value = serverStyle;
-                            // 触发描述更新
-                            onTKIStyleChange();
-                        }
-                        
-                        // 同时更新本地存储
-                        localStorage.setItem('currentInterventionStyle', serverStyle);
-                        
-                        console.log(`从服务器加载干预风格: ${serverStyle}`);
-                        resolve(serverStyle);
-                    })
-                    .catch(error => {
-                        console.error('从服务器加载风格失败:', error);
-                        // 如果服务器请求失败，使用本地存储的备份
-                        const savedStyle = localStorage.getItem('currentInterventionStyle');
-                        if (savedStyle) {
-                            updateCurrentInterventionStyle(savedStyle);
-                            // 同步TKI控制面板的选择（仅管理员可见）
-                            const tkiStyleSelect = document.getElementById('tkiStyle');
-                            if (tkiStyleSelect && currentUser && currentUser.role === 'admin') {
-                                tkiStyleSelect.value = savedStyle;
-                                onTKIStyleChange();
-                            }
-                        } else {
-                            // 默认风格
-                            updateCurrentInterventionStyle('collaborating');
-                            // 同步TKI控制面板的选择（仅管理员可见）
-                            const tkiStyleSelect = document.getElementById('tkiStyle');
-                            if (tkiStyleSelect && currentUser && currentUser.role === 'admin') {
-                                tkiStyleSelect.value = 'collaborating';
-                                onTKIStyleChange();
-                            }
-                        }
-                        resolve(savedStyle || 'collaborating');
-                    });
-            });
-        }
+        
+
+        
+
 
         // 显示通知消息
         function showNotification(message) {

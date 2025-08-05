@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据统计仪表板 - TKI智能干预聊天机器人</title>
+    <title>数据统计仪表板 - 聊天室系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -105,9 +105,7 @@
             background: #f04747;
         }
 
-        .stat-icon.interventions {
-            background: #faa61a;
-        }
+
 
         .stat-icon.effectiveness {
             background: #43b581;
@@ -228,9 +226,7 @@
             background: #5865f2;
         }
 
-        .activity-icon.intervention {
-            background: #faa61a;
-        }
+
 
         .activity-icon.interruption {
             background: #f04747;
@@ -328,37 +324,9 @@
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon interventions">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div>
-                        <div class="stat-title">干预次数</div>
-                        <div class="stat-value" id="totalInterventions">0</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span id="interventionChange">+8%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon effectiveness">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div>
-                        <div class="stat-title">干预效果</div>
-                        <div class="stat-value" id="effectiveness">85%</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span id="effectivenessChange">+3%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+
         </div>
 
         <!-- 图表区域 -->
@@ -372,14 +340,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">TKI策略使用分布</h3>
-                </div>
-                <div class="chart-container">
-                    <canvas id="strategyChart"></canvas>
-                </div>
-            </div>
+
         </div>
 
         <!-- 最近活动 -->
@@ -400,7 +361,7 @@
     </div>
 
     <script>
-        let genderChart, strategyChart;
+        let genderChart;
 
         // 检查登录状态
         window.onload = function() {
@@ -451,14 +412,10 @@
         function updateStats(stats) {
             document.getElementById('totalMessages').textContent = stats.totalMessages || 0;
             document.getElementById('totalInterruptions').textContent = stats.totalInterruptions || 0;
-            document.getElementById('totalInterventions').textContent = stats.totalInterventions || 0;
-            document.getElementById('effectiveness').textContent = `${stats.effectiveness || 85}%`;
 
             // 更新变化率
             document.getElementById('messageChange').textContent = `${stats.messageChange || '+12'}%`;
             document.getElementById('interruptionChange').textContent = `${stats.interruptionChange || '-5'}%`;
-            document.getElementById('interventionChange').textContent = `${stats.interventionChange || '+8'}%`;
-            document.getElementById('effectivenessChange').textContent = `${stats.effectivenessChange || '+3'}%`;
 
             // 更新图表数据
             updateCharts(stats);
@@ -495,49 +452,7 @@
                 }
             });
 
-            // TKI策略分布图表
-            const strategyCtx = document.getElementById('strategyChart').getContext('2d');
-            strategyChart = new Chart(strategyCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['协作', '竞争', '妥协', '回避', '迁就'],
-                    datasets: [{
-                        label: '使用次数',
-                        data: [25, 15, 20, 10, 30],
-                        backgroundColor: '#5865f2',
-                        borderColor: '#4752c4',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: '#dcddde'
-                            },
-                            grid: {
-                                color: '#40444b'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#dcddde'
-                            },
-                            grid: {
-                                color: '#40444b'
-                            }
-                        }
-                    }
-                }
-            });
+
         }
 
         // 更新图表数据
@@ -551,16 +466,7 @@
                 genderChart.update();
             }
 
-            if (strategyChart && stats.strategyDistribution) {
-                strategyChart.data.datasets[0].data = [
-                    stats.strategyDistribution.collaborating || 0,
-                    stats.strategyDistribution.competing || 0,
-                    stats.strategyDistribution.compromising || 0,
-                    stats.strategyDistribution.avoiding || 0,
-                    stats.strategyDistribution.accommodating || 0
-                ];
-                strategyChart.update();
-            }
+
         }
 
         // 显示活动列表
@@ -594,7 +500,6 @@
         function getActivityIcon(type) {
             const icons = {
                 'message': 'fa-comment',
-                'intervention': 'fa-robot',
                 'interruption': 'fa-exclamation-triangle'
             };
             return icons[type] || 'fa-info-circle';

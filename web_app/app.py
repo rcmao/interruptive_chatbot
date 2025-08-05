@@ -26,63 +26,21 @@ import pytz
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 导入项目模块
+# 导入翻译模块
 try:
-    # 修复导入路径
-    import sys
-    import os
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(current_dir)
-    sys.path.insert(0, project_root)
-    
-    from src.detectors.gpt4_realtime_context_analyzer import GPT4RealtimeContextAnalyzer
-    from core.tki_gender_aware_bot import TKIGenderAwareBot
     from translations import get_text, get_language_list
 except ImportError as e:
-    logger.error(f"导入项目模块失败: {e}")
-    # 创建空的占位符类
-    class GPT4RealtimeContextAnalyzer:
-        def __init__(self):
-            self.conversation_contexts = {}
-            self.intervention_history = deque(maxlen=50)
-            self.total_analyses = 0
-            self.recent_interventions = 0
-            self.trigger_counts = {}
-        
-        def get_analysis_statistics(self):
-            return {
-                'total_analyses': self.total_analyses,
-                'recent_interventions': len(self.intervention_history),
-                'active_contexts': len(self.conversation_contexts),
-                'trigger_counts': self.trigger_counts
-            }
-        
-        def add_intervention(self, room_id, trigger_type, confidence=0.8):
-            """添加干预记录"""
-            intervention = {
-                'room_id': room_id,
-                'trigger_type': trigger_type,
-                'confidence': confidence,
-                'timestamp': datetime.now()
-            }
-            self.intervention_history.append(intervention)
-            self.recent_interventions += 1
-            
-            # 更新触发类型统计
-            if trigger_type not in self.trigger_counts:
-                self.trigger_counts[trigger_type] = 0
-            self.trigger_counts[trigger_type] += 1
-        
-        def add_analysis(self):
-            """增加分析次数"""
-            self.total_analyses += 1
+    logger.error(f"导入翻译模块失败: {e}")
+    # 创建简单的翻译函数
+    def get_text(key, lang='zh'):
+        return key
     
-    class TKIGenderAwareBot:
-        pass
+    def get_language_list():
+        return ['zh', 'en']
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chatbot.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chatroom.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -102,7 +60,7 @@ def get_local_time():
 
 # 数据库模型定义
 class User(UserMixin, db.Model):
-    """用户模型 - 简化权限系统"""
+    """用户模型"""
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -131,11 +89,11 @@ class User(UserMixin, db.Model):
         return self.role == 'member'
     
     def can_access_user_data(self, user_id):
-        """检查是否可以访问指定用户的数据"""
+        """检查是否可以访问用户数据"""
         return self.is_admin() or self.id == user_id
     
     def can_manage_rooms(self):
-        """检查是否可以管理群组"""
+        """检查是否可以管理房间"""
         return self.is_admin()
     
     def can_manage_members(self):
@@ -143,7 +101,7 @@ class User(UserMixin, db.Model):
         return self.is_admin()
     
     def can_view_statistics(self):
-        """检查是否可以查看统计信息"""
+        """检查是否可以查看统计"""
         return self.is_admin()
     
     def can_export_data(self):
@@ -168,10 +126,9 @@ class Room(db.Model):
     # 关系
     members = db.relationship('RoomMembership', backref='room', lazy=True)
     messages = db.relationship('Message', backref='room', lazy=True)
-    interventions = db.relationship('Intervention', backref='room', lazy=True)
 
 class RoomMembership(db.Model):
-    """房间成员关系 - 支持角色管理"""
+    """房间成员关系"""
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'), nullable=False)
@@ -188,11 +145,11 @@ class RoomMembership(db.Model):
         return self.role == 'admin'
     
     def is_room_member(self):
-        """检查是否为房间普通成员"""
+        """检查是否为房间成员"""
         return self.role == 'member'
 
 class Conversation(db.Model):
-    """对话模型（保留原有）"""
+    """对话模型"""
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -212,45 +169,6 @@ class Message(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     conversation_id = db.Column(db.Integer, db.ForeignKey('conversation.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
-    
-    # 干预相关
-    has_interruption = db.Column(db.Boolean, default=False)
-    interruption_type = db.Column(db.String(50))
-    intervention_applied = db.Column(db.Boolean, default=False)
-
-class Intervention(db.Model):
-    """干预记录模型"""
-    id = db.Column(db.Integer, primary_key=True)
-    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), nullable=False)
-    message_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=False)
-    strategy = db.Column(db.String(50), nullable=False)  # TKI策略类型
-    intervention_text = db.Column(db.Text, nullable=False)
-    trigger_type = db.Column(db.String(50))  # 触发类型
-    effectiveness = db.Column(db.Integer)  # 效果评分 1-5
-    created_at = db.Column(db.DateTime, default=get_local_time)
-
-class Statistics(db.Model):
-    """统计数据模型"""
-    id = db.Column(db.Integer, primary_key=True)
-    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    total_messages = db.Column(db.Integer, default=0)
-    male_messages = db.Column(db.Integer, default=0)
-    female_messages = db.Column(db.Integer, default=0)
-    interruptions_detected = db.Column(db.Integer, default=0)
-    interventions_applied = db.Column(db.Integer, default=0)
-    strategy_counts = db.Column(db.Text)  # JSON格式存储策略统计
-    created_at = db.Column(db.DateTime, default=get_local_time)
-
-class InterventionStyle(db.Model):
-    """干预风格设置模型"""
-    id = db.Column(db.Integer, primary_key=True)
-    style = db.Column(db.String(50), nullable=False, default='none')  # 当前风格
-    description = db.Column(db.Text)  # 风格描述
-    is_active = db.Column(db.Boolean, default=True)  # 是否激活
-    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))  # 创建者
-    created_at = db.Column(db.DateTime, default=get_local_time)
-    updated_at = db.Column(db.DateTime, default=get_local_time, onupdate=get_local_time)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -296,12 +214,6 @@ def admin_required(f):
 # 创建数据库表
 with app.app_context():
     db.create_all()
-
-# TKI机器人实例
-tki_bot = TKIGenderAwareBot()
-
-# 初始化GPT-4实时上下文分析器
-gpt4_context_analyzer = GPT4RealtimeContextAnalyzer()
 
 # 路由定义
 @app.route('/')
@@ -617,12 +529,6 @@ def delete_room(room_id):
         # 删除房间消息
         Message.query.filter_by(room_id=room_id).delete()
         
-        # 删除干预记录
-        Intervention.query.filter_by(room_id=room_id).delete()
-        
-        # 删除统计数据
-        Statistics.query.filter_by(room_id=room_id).delete()
-        
         # 删除房间本身
         db.session.delete(room)
         db.session.commit()
@@ -653,10 +559,7 @@ def get_room_messages(room_id):
             'content': msg.content,
             'author': msg.author,
             'avatar': user_avatar,
-            'timestamp': msg.timestamp.isoformat(),
-            'has_interruption': msg.has_interruption,
-            'interruption_type': msg.interruption_type,
-            'intervention_applied': msg.intervention_applied
+            'timestamp': msg.timestamp.isoformat()
         })
     
     return jsonify(message_list)
@@ -682,47 +585,17 @@ def send_message(room_id):
     db.session.add(message)
     db.session.commit()
     
-    # 使用TKI机器人分析消息
-    try:
-        # 暂时跳过TKI分析，专注于消息发送功能
-        # analysis_result = await tki_bot.process_message(
-        #     message_data['content'], 
-        #     user.username, 
-        #     user.gender
-        # )
-        pass
-        
-    except Exception as e:
-        print(f"TKI分析错误: {e}")
-        # 如果TKI分析失败，继续处理消息
-        pass
-    
-    db.session.commit()
-    
     # 通过WebSocket广播消息到房间
     message_data = {
         'id': message.id,
         'content': message.content,
         'author': message.author,
         'avatar': current_user.avatar,  # 添加用户头像
-        'timestamp': message.timestamp.isoformat(),
-        'has_interruption': message.has_interruption,
-        'interruption_type': message.interruption_type,
-        'intervention_applied': message.intervention_applied
+        'timestamp': message.timestamp.isoformat()
     }
     
     # 发送消息到房间
     socketio.emit('message', message_data, room=str(room_id))
-    
-    # 如果有干预，发送干预消息
-    if message.intervention_applied:
-        intervention_data = {
-            'type': 'intervention',
-            'strategy': message.interruption_type,
-            'text': message.intervention_text, # Use message.intervention_text
-            'timestamp': get_local_time().isoformat()
-        }
-        socketio.emit('intervention', intervention_data, room=str(room_id))
     
     return jsonify(message_data), 201
 
@@ -783,30 +656,15 @@ def get_room_stats(room_id):
     
     # 获取今日统计
     today = get_local_time().date()
-    stats = Statistics.query.filter_by(room_id=room_id, date=today).first()
-    
-    if not stats:
-        # 创建新的统计记录
-        stats = Statistics(room_id=room_id, date=today)
-        db.session.add(stats)
-        db.session.commit()
-    
-    # 计算实时统计
-    messages = Message.query.filter_by(room_id=room_id).all()
-    total_messages = len(messages)
-    male_messages = len([m for m in messages if m.gender == 'male'])
-    female_messages = len([m for m in messages if m.gender == 'female'])
-    interruptions = len([m for m in messages if m.has_interruption])
-    interventions = len([m for m in messages if m.intervention_applied])
+    # 由于没有冲突检测，这里只统计消息数量
+    total_messages = Message.query.filter_by(room_id=room_id).count()
     
     return jsonify({
         'total_messages': total_messages,
-        'male_messages': male_messages,
-        'female_messages': female_messages,
-        'interruptions': interruptions,
-        'interventions': interventions,
-        'male_percentage': round(male_messages / total_messages * 100, 1) if total_messages > 0 else 0,
-        'female_percentage': round(female_messages / total_messages * 100, 1) if total_messages > 0 else 0
+        'male_messages': 0, # 没有冲突检测，无法统计性别
+        'female_messages': 0,
+        'male_percentage': 0,
+        'female_percentage': 0
     })
 
 @app.route('/api/dashboard/stats', methods=['GET'])
@@ -814,47 +672,27 @@ def get_dashboard_stats():
     """获取仪表板统计数据"""
     # 计算总体统计
     total_messages = Message.query.count()
-    total_interruptions = Message.query.filter_by(has_interruption=True).count()
-    total_interventions = Message.query.filter_by(intervention_applied=True).count()
     
     # 性别分布
     male_messages = Message.query.filter_by(gender='male').count()
     female_messages = Message.query.filter_by(gender='female').count()
     unknown_messages = Message.query.filter_by(gender='unknown').count()
     
-    # TKI策略分布
-    interventions = Intervention.query.all()
-    strategy_counts = {}
-    for intervention in interventions:
-        strategy = intervention.strategy
-        strategy_counts[strategy] = strategy_counts.get(strategy, 0) + 1
-    
-    # 计算干预效果（简化计算）
-    effectiveness = 85  # 默认值，实际应该基于用户反馈计算
-    
     return jsonify({
         'totalMessages': total_messages,
-        'totalInterruptions': total_interruptions,
-        'totalInterventions': total_interventions,
-        'effectiveness': effectiveness,
         'messageChange': '+12',
-        'interruptionChange': '-5',
-        'interventionChange': '+8',
-        'effectivenessChange': '+3',
         'genderDistribution': {
             'male': male_messages,
             'female': female_messages,
             'unknown': unknown_messages
-        },
-        'strategyDistribution': strategy_counts
+        }
     })
 
 @app.route('/api/dashboard/activity', methods=['GET'])
 def get_dashboard_activity():
     """获取最近活动"""
-    # 获取最近的消息和干预
+    # 获取最近的消息
     recent_messages = Message.query.order_by(Message.timestamp.desc()).limit(10).all()
-    recent_interventions = Intervention.query.order_by(Intervention.created_at.desc()).limit(5).all()
     
     activities = []
     
@@ -864,14 +702,6 @@ def get_dashboard_activity():
             'type': 'message',
             'text': f'{msg.author} 发送了消息',
             'timestamp': msg.timestamp.isoformat()
-        })
-    
-    # 添加干预活动
-    for intervention in recent_interventions:
-        activities.append({
-            'type': 'intervention',
-            'text': f'TKI机器人应用了 {intervention.strategy} 策略',
-            'timestamp': intervention.created_at.isoformat()
         })
     
     # 按时间排序
@@ -1065,117 +895,27 @@ def handle_leave_room(data):
             'timestamp': datetime.now().isoformat()
         }, room=room)
 
-@socketio.on('tki_style_change')
-def handle_tki_style_change(data):
-    """处理TKI风格选择事件"""
-    print(f'收到TKI风格选择: {data}')
-    room = data.get('room')
-    style = data.get('style')
-    
-    if not room or not style:
-        print('房间或风格数据为空')
-        return
-    
-    # 验证风格是否有效
-    valid_styles = ['none', 'collaborating', 'accommodating', 'competing', 'compromising', 'avoiding']
-    if style not in valid_styles:
-        print(f'无效的TKI风格: {style}')
-        return
-    
-    try:
-        # 更新数据库中的干预风格设置
-        # 首先将所有现有设置设为非激活
-        InterventionStyle.query.update({'is_active': False})
-        
-        # 查找是否已有该风格的记录
-        existing_style = InterventionStyle.query.filter_by(style=style).first()
-        if existing_style:
-            # 更新现有记录
-            existing_style.is_active = True
-            existing_style.description = get_tki_style_description(style)
-            existing_style.updated_at = get_local_time()
-        else:
-            # 创建新记录
-            new_style = InterventionStyle(
-                style=style,
-                description=get_tki_style_description(style),
-                is_active=True
-            )
-            db.session.add(new_style)
-        
-        db.session.commit()
-        
-        # 更新应用配置缓存
-        app.config['CURRENT_INTERVENTION_STYLE'] = style
-        
-        print(f'TKI风格已保存到数据库: {style}')
-        
-    except Exception as e:
-        print(f'保存TKI风格到数据库失败: {e}')
-        db.session.rollback()
-    
-    # 广播风格选择到房间
-    emit('tki_style_updated', {
-        'room': room,
-        'style': style,
-        'description': get_tki_style_description(style)
-    }, room=room)
-    
-    # 同时向所有客户端广播（确保所有用户都能收到）
-    socketio.emit('intervention_style_updated', {
-        'style': style,
-        'description': get_tki_style_description(style)
-    })
-    
-    print(f'TKI风格已更新为: {style}')
-
-def get_tki_style_description(style):
-    """获取TKI风格的描述"""
-    descriptions = {
-        'none': '无插话 - AI不会进行任何干预',
-        'collaborating': '协作型 - 整合各方观点，推动共识，平衡支持女性表达与维护群体和谐',
-        'accommodating': '迁就型 - 优先维护和谐，用温和语气为女性缓颊，避免冲突',
-        'competing': '竞争型 - 强势捍卫女性表达权，正面对抗偏见，可能激化冲突',
-        'compromising': '妥协型 - 设置公平讨论机制，保障发言机会，不参与观点评价',
-        'avoiding': '回避型 - 岔开矛盾话题，表面轻松，实则削弱女性表达机会'
-    }
-    return descriptions.get(style, '未知风格')
+# TKI风格选择功能已移除
 
 @socketio.on('send_message')
 def handle_send_message(data):
-    """处理发送消息 - 前端发送的事件名"""
-    print(f'=== 开始处理send_message事件 ===')
-    print(f'收到WebSocket消息: {data}')
-    print(f'数据类型: {type(data)}')
-    print(f'数据内容: {json.dumps(data, default=str) if data else "None"}')
-    
+    """处理发送消息"""
     room = data.get('room')
     message_data = data.get('message')
     
-    print(f'房间: {room}, 消息数据: {message_data}')
-    
     if not room or not message_data:
-        print('房间或消息数据为空，退出处理')
         return
-    
-    print(f'=== 数据验证通过，继续处理 ===')
     
     # 获取用户信息
     user_id = session.get('user_id')
-    print(f'从session获取的用户ID: {user_id}')
     
     if not user_id and current_user.is_authenticated:
         user_id = current_user.id
-        print(f'从current_user获取的用户ID: {user_id}')
     
-    print(f'最终用户ID: {user_id}')
-    
-    # 如果没有用户ID（测试页面），使用默认用户
+    # 如果没有用户ID，使用默认用户
     if not user_id:
-        print('无法获取用户ID，使用默认用户')
-        user = User.query.first()  # 获取第一个用户作为默认用户
+        user = User.query.first()
         if not user:
-            # 如果没有用户，创建一个默认用户
             user = User(
                 username='test_user',
                 email='test@example.com',
@@ -1185,16 +925,10 @@ def handle_send_message(data):
             )
             db.session.add(user)
             db.session.commit()
-            print(f'创建默认用户: {user.username}')
-        else:
-            print(f'使用现有用户: {user.username}')
     else:
         user = User.query.get(user_id)
         if not user:
-            print('用户不存在')
             return
-    
-    print(f'用户信息: {user.username}')
     
     # 创建消息记录
     message = Message(
@@ -1205,76 +939,41 @@ def handle_send_message(data):
         user_id=user.id
     )
     
-    print(f'创建消息: {message.content}')
-    
     db.session.add(message)
     db.session.commit()
-    
-    print(f'消息已保存到数据库，ID: {message.id}')
     
     # 构建消息数据
     message_info = {
         'id': message.id,
         'content': message.content,
         'author': message.author,
-        'avatar': user.avatar,  # 添加用户头像
-        'timestamp': message.timestamp.isoformat(),
-        'has_interruption': message.has_interruption,
-        'interruption_type': message.interruption_type,
-        'intervention_applied': message.intervention_applied
+        'avatar': user.avatar,
+        'timestamp': message.timestamp.isoformat()
     }
     
-    print(f'准备广播消息: {message_info}')
-    print(f'广播到房间: {room}')
-    
-    # 确保room是字符串类型
-    room = str(room)
-    
     # 广播消息到房间
+    room = str(room)
     socketio.emit('message', message_info, room=room)
-    print(f'消息已广播到房间 {room}')
-    
-    # 同时向所有客户端广播（确保能收到）
-    socketio.emit('message', message_info)
-    print(f'消息已向所有客户端广播')
-    
-    print(f'=== send_message事件处理完成 ===')
 
 @socketio.on('chat_message')
 async def handle_chat_message(data):
     """处理发送消息 - 兼容旧的事件名"""
-    print(f'=== 开始处理chat_message事件 ===')
-    print(f'收到WebSocket消息: {data}')
-    print(f'数据类型: {type(data)}')
-    print(f'数据内容: {json.dumps(data, default=str) if data else "None"}')
-    
     room = data.get('room')
     message_data = data.get('message')
     
-    print(f'房间: {room}, 消息数据: {message_data}')
-    
     if not room or not message_data:
-        print('房间或消息数据为空，退出处理')
         return
-    
-    print(f'=== 数据验证通过，继续处理 ===')
     
     # 获取用户信息
     user_id = session.get('user_id')
-    print(f'从session获取的用户ID: {user_id}')
     
     if not user_id and current_user.is_authenticated:
         user_id = current_user.id
-        print(f'从current_user获取的用户ID: {user_id}')
     
-    print(f'最终用户ID: {user_id}')
-    
-    # 如果没有用户ID（测试页面），使用默认用户
+    # 如果没有用户ID，使用默认用户
     if not user_id:
-        print('无法获取用户ID，使用默认用户')
-        user = User.query.first()  # 获取第一个用户作为默认用户
+        user = User.query.first()
         if not user:
-            # 如果没有用户，创建一个默认用户
             user = User(
                 username='test_user',
                 email='test@example.com',
@@ -1284,16 +983,10 @@ async def handle_chat_message(data):
             )
             db.session.add(user)
             db.session.commit()
-            print(f'创建默认用户: {user.username}')
-        else:
-            print(f'使用现有用户: {user.username}')
     else:
         user = User.query.get(user_id)
         if not user:
-            print('用户不存在')
             return
-    
-    print(f'用户信息: {user.username}')
     
     # 创建消息记录
     message = Message(
@@ -1304,40 +997,21 @@ async def handle_chat_message(data):
         user_id=user.id
     )
     
-    print(f'创建消息: {message.content}')
-    
     db.session.add(message)
     db.session.commit()
-    
-    print(f'消息已保存到数据库，ID: {message.id}')
     
     # 构建消息数据
     message_info = {
         'id': message.id,
         'content': message.content,
         'author': message.author,
-        'avatar': user.avatar,  # 添加用户头像
-        'timestamp': message.timestamp.isoformat(),
-        'has_interruption': message.has_interruption,
-        'interruption_type': message.interruption_type,
-        'intervention_applied': message.intervention_applied
+        'avatar': user.avatar,
+        'timestamp': message.timestamp.isoformat()
     }
     
-    print(f'准备广播消息: {message_info}')
-    print(f'广播到房间: {room}')
-    
-    # 确保room是字符串类型
-    room = str(room)
-    
     # 广播消息到房间
+    room = str(room)
     socketio.emit('message', message_info, room=room)
-    print(f'消息已广播到房间 {room}')
-    
-    # 同时向所有客户端广播（确保能收到）
-    socketio.emit('message', message_info)
-    print(f'消息已向所有客户端广播')
-    
-    print(f'=== chat_message事件处理完成 ===')
 
 @app.route('/test_broadcast')
 def test_broadcast():
@@ -1358,15 +1032,13 @@ def test_send_message():
         content = data.get('content', '测试消息')
         author = data.get('author', '测试用户')
         
-        print(f'测试发送消息: 房间={room_id}, 内容={content}, 作者={author}')
-        
         # 创建消息记录
         message = Message(
             content=content,
             author=author,
             gender='unknown',
             room_id=room_id,
-            user_id=1  # 使用默认用户ID
+            user_id=1
         )
         
         db.session.add(message)
@@ -1378,240 +1050,17 @@ def test_send_message():
             'content': message.content,
             'author': message.author,
             'avatar': '',
-            'timestamp': message.timestamp.isoformat(),
-            'has_interruption': message.has_interruption,
-            'interruption_type': message.interruption_type,
-            'intervention_applied': message.intervention_applied
+            'timestamp': message.timestamp.isoformat()
         }
         
-        # 广播消息 - 使用socketio.emit而不是emit
+        # 广播消息
         room = str(room_id)
         socketio.emit('message', message_info, room=room)
-        socketio.emit('message', message_info)  # 同时向所有客户端广播
-        
-        print(f'测试消息已广播: {message_info}')
+        socketio.emit('message', message_info)
         
         return jsonify({'success': True, 'message': message_info})
     except Exception as e:
-        print(f'测试消息发送失败: {e}')
         return jsonify({'success': False, 'error': str(e)}), 500
-
-# 新增：实时冲突检测API端点
-@app.route('/api/admin/detection-status', methods=['GET'])
-def get_detection_status():
-    """获取检测系统状态"""
-    try:
-        # 获取GPT-4分析器统计信息
-        stats = gpt4_context_analyzer.get_analysis_statistics()
-        
-        return jsonify({
-            'status': 'active',
-            'detector_type': 'gpt4_realtime_context',
-            'gpt_analysis_enabled': True,
-            'last_update': datetime.now().isoformat(),
-            'total_analyses': stats.get('total_analyses', 0),
-            'recent_interventions': stats.get('recent_interventions', 0),
-            'active_contexts': stats.get('active_contexts', 0),
-            'trigger_counts': stats.get('trigger_counts', {})
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'error': str(e)
-        }), 500
-
-@app.route('/api/admin/intervention-style', methods=['POST'])
-@admin_required
-def update_intervention_style():
-    """更新干预风格"""
-    try:
-        data = request.get_json()
-        style = data.get('style', 'collaborating')
-        
-        # 验证风格类型
-        valid_styles = ['none', 'auto', 'collaborating', 'accommodating', 'competing', 'compromising', 'avoiding']
-        if style not in valid_styles:
-            return jsonify({'success': False, 'error': '无效的风格类型'}), 400
-        
-        # 获取或创建风格设置记录
-        style_setting = InterventionStyle.query.filter_by(is_active=True).first()
-        if not style_setting:
-            style_setting = InterventionStyle(
-                style=style,
-                description=f'当前设置为{style}风格',
-                created_by=current_user.id if current_user.is_authenticated else None
-            )
-            db.session.add(style_setting)
-        else:
-            style_setting.style = style
-            style_setting.description = f'当前设置为{style}风格'
-            style_setting.updated_at = get_local_time()
-        
-        db.session.commit()
-        
-        # 同时更新app.config作为缓存
-        app.config['CURRENT_INTERVENTION_STYLE'] = style
-        
-        # 广播风格更新
-        socketio.emit('intervention_style_updated', {
-            'style': style,
-            'timestamp': datetime.now().isoformat()
-        })
-        
-        logger.info(f"干预风格已更新为: {style}")
-        return jsonify({'success': True, 'style': style})
-    except Exception as e:
-        logger.error(f"更新干预风格失败: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/admin/current-intervention-style', methods=['GET'])
-def get_current_intervention_style():
-    """获取当前干预风格"""
-    try:
-        # 首先从数据库获取
-        style_setting = InterventionStyle.query.filter_by(is_active=True).first()
-        if style_setting:
-            style = style_setting.style
-        else:
-            # 如果没有数据库记录，使用默认值
-            style = 'none'
-            # 创建默认记录
-            default_setting = InterventionStyle(
-                style=style,
-                description='默认无插话风格',
-                is_active=True
-            )
-            db.session.add(default_setting)
-            db.session.commit()
-        
-        # 更新app.config缓存
-        app.config['CURRENT_INTERVENTION_STYLE'] = style
-        
-        return jsonify({'style': style})
-    except Exception as e:
-        logger.error(f"获取当前干预风格失败: {e}")
-        return jsonify({'style': 'none', 'error': str(e)})
-
-@app.route('/api/admin/conflict-detection-live', methods=['GET'])
-def get_live_conflict_detection():
-    """获取实时冲突检测数据"""
-    try:
-        stats = gpt4_context_analyzer.get_analysis_statistics()
-        
-        # 获取最近的干预记录
-        recent_interventions = []
-        for intervention in list(gpt4_context_analyzer.intervention_history)[-10:]:
-            recent_interventions.append({
-                'room_id': intervention.get('room_id', 'unknown'),
-                'trigger_type': intervention.get('trigger_type', 'unknown'),
-                'confidence': intervention.get('confidence', 0.8),
-                'timestamp': intervention.get('timestamp', datetime.now()).isoformat()
-            })
-        
-        # 添加一些模拟数据用于测试
-        if stats.get('total_analyses', 0) == 0:
-            # 模拟一些数据
-            gpt4_context_analyzer.add_analysis()
-            gpt4_context_analyzer.add_intervention('room_1', 'interruption', 0.85)
-            gpt4_context_analyzer.add_intervention('room_2', 'bias_detection', 0.92)
-            stats = gpt4_context_analyzer.get_analysis_statistics()
-        
-        return jsonify({
-            'status': 'active',
-            'total_analyses': stats.get('total_analyses', 0),
-            'recent_interventions': stats.get('recent_interventions', 0),
-            'active_contexts': stats.get('active_contexts', 0),
-            'trigger_counts': stats.get('trigger_counts', {}),
-            'recent_interventions_list': recent_interventions,
-            'last_update': datetime.now().isoformat()
-        })
-    except Exception as e:
-        logger.error(f"获取实时冲突检测数据失败: {e}")
-        return jsonify({
-            'status': 'error',
-            'error': str(e)
-        }), 500
-
-# 新增：生成基于风格的干预消息
-def generate_style_based_intervention(context_messages, trigger_type, style):
-    """根据风格生成干预消息"""
-    
-    # 导入GPT风格干预生成器
-    import sys
-    import os
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-    
-    from src.interventions.gpt_style_intervention_generator import (
-        GPTStyleInterventionGenerator, 
-        GPTInterventionContext, 
-        AdminInterventionStyle, 
-        InterventionTrigger
-    )
-    
-    # 初始化生成器
-    generator = GPTStyleInterventionGenerator()
-    
-    # 转换触发类型
-    trigger_mapping = {
-        'female_interrupted': InterventionTrigger.FEMALE_INTERRUPTED,
-        'female_ignored': InterventionTrigger.FEMALE_IGNORED,
-        'male_dominance': InterventionTrigger.MALE_DOMINANCE,
-        'male_consecutive': InterventionTrigger.MALE_CONSECUTIVE,
-        'gender_imbalance': InterventionTrigger.GENDER_IMBALANCE,
-        'expression_difficulty': InterventionTrigger.EXPRESSION_DIFFICULTY,
-        'aggressive_context': InterventionTrigger.AGGRESSIVE_CONTEXT
-    }
-    
-    trigger_type_enum = trigger_mapping.get(trigger_type, InterventionTrigger.GENDER_IMBALANCE)
-    
-    # 转换风格
-    style_mapping = {
-        'collaborating': AdminInterventionStyle.COLLABORATING,
-        'accommodating': AdminInterventionStyle.ACCOMMODATING,
-        'competing': AdminInterventionStyle.COMPETING,
-        'compromising': AdminInterventionStyle.COMPROMISING,
-        'avoiding': AdminInterventionStyle.AVOIDING,
-        'auto': AdminInterventionStyle.AUTO
-    }
-    
-    admin_style = style_mapping.get(style, AdminInterventionStyle.AUTO)
-    
-    # 分析参与者性别
-    female_participants = []
-    male_participants = []
-    
-    for msg in context_messages:
-        author = msg.get('author', '')
-        gender = msg.get('gender', 'unknown')
-        if gender == 'female' and author not in female_participants:
-            female_participants.append(author)
-        elif gender == 'male' and author not in male_participants:
-            male_participants.append(author)
-    
-    # 创建GPT干预上下文
-    context = GPTInterventionContext(
-        trigger_type=trigger_type_enum,
-        urgency_level=4,  # 默认中等紧急程度
-        confidence=0.8,   # 默认高置信度
-        recent_messages=context_messages,
-        female_participants=female_participants,
-        male_participants=male_participants,
-        admin_style=admin_style
-    )
-    
-    # 生成干预消息
-    import asyncio
-    try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        intervention = loop.run_until_complete(generator.generate_intervention(context))
-        loop.close()
-        return intervention
-    except Exception as e:
-        print(f"GPT干预生成失败: {e}")
-        # 返回备用消息
-        return "让我们继续建设性的讨论。"
-
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=8081)

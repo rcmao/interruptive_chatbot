@@ -64,22 +64,15 @@ TRANSLATIONS = {
         # 消息相关
         "message_sent": "消息发送成功",
         "message_failed": "发送失败，请重试",
-        "intervention_bot": "TKI干预机器人",
-        "strategy": "TKI策略",
-        "intervention_message": "干预消息",
+
         
         # 分析相关
         "analysis_report": "分析报告",
         "conversation_analysis": "对话分析",
-        "intervention_stats": "干预统计",
-        "strategy_distribution": "策略分布",
-        "interruption_types": "打断类型",
         "metrics": "指标",
         "total_messages": "总消息数",
         "female_messages": "女性消息数",
         "male_messages": "男性消息数",
-        "interventions_count": "干预次数",
-        "average_urgency": "平均紧急度",
         
         # 用户界面
         "loading": "加载中...",
@@ -114,7 +107,7 @@ TRANSLATIONS = {
         "invalid_format": "格式无效",
         
         # 提示消息
-        "welcome_message": "欢迎使用TKI智能干预机器人！",
+        "welcome_message": "欢迎使用聊天室系统！",
         "help_message": "点击左侧菜单开始使用",
         "no_messages": "暂无消息",
         "no_conversations": "暂无对话",
@@ -139,7 +132,7 @@ TRANSLATIONS = {
         # 通知
         "enable_notifications": "启用通知",
         "message_notifications": "消息通知",
-        "intervention_notifications": "干预通知",
+
         "sound_notifications": "声音通知",
         
         # 隐私
@@ -223,22 +216,15 @@ TRANSLATIONS = {
         # Messages
         "message_sent": "Message sent successfully",
         "message_failed": "Failed to send message, please try again",
-        "intervention_bot": "TKI Intervention Bot",
-        "strategy": "TKI Strategy",
-        "intervention_message": "Intervention Message",
+
         
         # Analysis
         "analysis_report": "Analysis Report",
         "conversation_analysis": "Conversation Analysis",
-        "intervention_stats": "Intervention Statistics",
-        "strategy_distribution": "Strategy Distribution",
-        "interruption_types": "Interruption Types",
         "metrics": "Metrics",
         "total_messages": "Total Messages",
         "female_messages": "Female Messages",
         "male_messages": "Male Messages",
-        "interventions_count": "Interventions Count",
-        "average_urgency": "Average Urgency",
         
         # User interface
         "loading": "Loading...",
@@ -273,7 +259,7 @@ TRANSLATIONS = {
         "invalid_format": "Invalid format",
         
         # Tips
-        "welcome_message": "Welcome to TKI Intelligent Intervention Bot!",
+        "welcome_message": "Welcome to Chat Room System!",
         "help_message": "Click the left menu to get started",
         "no_messages": "No messages",
         "no_conversations": "No conversations",
@@ -298,7 +284,7 @@ TRANSLATIONS = {
         # Notifications
         "enable_notifications": "Enable Notifications",
         "message_notifications": "Message Notifications",
-        "intervention_notifications": "Intervention Notifications",
+
         "sound_notifications": "Sound Notifications",
         
         # Privacy

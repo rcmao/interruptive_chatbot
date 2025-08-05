@@ -21,23 +21,8 @@ def create_database():
             print("数据库表创建成功!")
             
             # 检查表是否存在
-            from app import InterventionStyle
             tables = db.engine.table_names()
             print(f"现有表: {tables}")
-            
-            # 创建默认风格设置
-            default_style = InterventionStyle.query.filter_by(is_active=True).first()
-            if not default_style:
-                default_style = InterventionStyle(
-                    style='collaborating',
-                    description='默认协作型风格',
-                    is_active=True
-                )
-                db.session.add(default_style)
-                db.session.commit()
-                print("默认风格设置已创建")
-            else:
-                print(f"当前风格设置: {default_style.style}")
                 
         except Exception as e:
             print(f"创建数据库表失败: {e}")
