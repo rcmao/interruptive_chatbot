@@ -903,6 +903,9 @@ def get_room_members(room_id):
     for membership in room.members:
         user = User.query.get(membership.user_id)
         if user:
+            # 简化逻辑：只要在房间中就显示为在线
+            is_online = membership.is_online
+            
             members.append({
                 'user_id': user.id,
                 'id': user.id,
@@ -911,7 +914,7 @@ def get_room_members(room_id):
                 'gender': user.gender,
                 'avatar': user.avatar,
                 'role': membership.role,
-                'is_online': membership.is_online,
+                'is_online': is_online,
                 'joined_at': membership.joined_at.isoformat()
             })
     
@@ -1016,6 +1019,19 @@ def test_admin_style():
 def handle_connect():
     """处理WebSocket连接"""
     print(f'客户端连接: {request.sid}')
+    
+    # 尝试从查询参数获取JWT token
+    token = request.args.get('token')
+    if token:
+        try:
+            payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            user_id = payload['user_id']
+            session['user_id'] = user_id
+            print(f'WebSocket连接用户ID: {user_id}')
+        except jwt.ExpiredSignatureError:
+            print('JWT token已过期')
+        except jwt.InvalidTokenError:
+            print('无效的JWT token')
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -1043,10 +1059,26 @@ def handle_join_room(data):
     if room:
         join_room(room)
         print(f'用户已加入房间: {room}')
+        
+        # 更新用户状态
+        user_id = session.get('user_id')
+        if user_id:
+            try:
+                # 更新房间成员状态
+                membership = RoomMembership.query.filter_by(
+                    user_id=user_id, room_id=int(room)
+                ).first()
+                if membership:
+                    membership.is_online = True
+                    db.session.commit()
+                    print(f'用户 {user_id} 在房间 {room} 中状态已更新为在线')
+            except Exception as e:
+                print(f'更新用户状态失败: {e}')
+        
         # 通知其他用户有新用户加入
         socketio.emit('user_joined', {
             'room': room,
-            'user_id': session.get('user_id'),
+            'user_id': user_id,
             'timestamp': datetime.now().isoformat()
         }, room=room)
 
@@ -1058,10 +1090,26 @@ def handle_leave_room(data):
     if room:
         leave_room(room)
         print(f'用户已离开房间: {room}')
+        
+        # 更新用户状态
+        user_id = session.get('user_id')
+        if user_id:
+            try:
+                # 更新房间成员状态
+                membership = RoomMembership.query.filter_by(
+                    user_id=user_id, room_id=int(room)
+                ).first()
+                if membership:
+                    membership.is_online = False
+                    db.session.commit()
+                    print(f'用户 {user_id} 在房间 {room} 中状态已更新为离线')
+            except Exception as e:
+                print(f'更新用户状态失败: {e}')
+        
         # 通知其他用户有用户离开
         socketio.emit('user_left', {
             'room': room,
-            'user_id': session.get('user_id'),
+            'user_id': user_id,
             'timestamp': datetime.now().isoformat()
         }, room=room)
 

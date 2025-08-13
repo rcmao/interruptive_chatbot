@@ -1033,7 +1033,8 @@
         // 连接WebSocket
         function connectWebSocket() {
             console.log('开始连接WebSocket...');
-            socket = io();
+            const token = localStorage.getItem('token');
+            socket = io(`?token=${encodeURIComponent(token)}`);
             
             socket.on('connect', () => {
                 console.log('WebSocket连接成功，房间ID:', currentRoomId);
@@ -1401,20 +1402,9 @@
             
             console.log('找到userList元素，开始处理成员数据');
             
-            // 过滤出真正在线的用户（在房间中且活跃）
-            const onlineUsers = members.filter(member => 
-                member.is_online && 
-                member.is_in_room && 
-                member.last_activity && 
-                (new Date().getTime() - new Date(member.last_activity).getTime()) < 30000 // 30秒内有活动
-            );
-            
-            const offlineUsers = members.filter(member => 
-                !member.is_online || 
-                !member.is_in_room || 
-                !member.last_activity || 
-                (new Date().getTime() - new Date(member.last_activity).getTime()) >= 30000
-            );
+            // 简化逻辑：只要在房间中就显示为在线
+            const onlineUsers = members.filter(member => member.is_online);
+            const offlineUsers = members.filter(member => !member.is_online);
             
             console.log('在线用户数:', onlineUsers.length, '离线用户数:', offlineUsers.length);
             
@@ -1520,15 +1510,11 @@
         }
 
         // 实时更新用户状态
-        function updateUserStatus(userId, isOnline, isInRoom, lastActivity) {
+        function updateUserStatus(userId, isOnline) {
             const userItem = document.querySelector(`[data-user-id="${userId}"]`);
             if (userItem) {
-                // 判断用户是否真正在线（在房间中且30秒内有活动）
-                const isActuallyOnline = isOnline && isInRoom && lastActivity && 
-                    (new Date().getTime() - new Date(lastActivity).getTime()) < 30000;
-                
-                const statusClass = isActuallyOnline ? 'online' : 'offline';
-                const statusText = isActuallyOnline ? t('online') : t('offline');
+                const statusClass = isOnline ? 'online' : 'offline';
+                const statusText = isOnline ? t('online') : t('offline');
                 
                 // 更新用户项样式
                 userItem.className = `user-item ${statusClass}`;
@@ -1545,7 +1531,7 @@
                     statusTextElement.textContent = statusText;
                 }
                 
-                console.log(`用户 ${userId} 状态更新为: ${isActuallyOnline ? '在线' : '离线'}`);
+                console.log(`用户 ${userId} 状态更新为: ${isOnline ? '在线' : '离线'}`);
             }
         }
 
