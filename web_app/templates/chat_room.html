@@ -744,6 +744,53 @@
                 0 8px 26px rgba(0,0,0,0.2),
                 inset 0 1px 0 rgba(255,255,255,0.25);
         }
+
+        /* 导出按钮样式 */
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(88, 101, 242, 0.8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+        }
+
+        .export-btn:hover {
+            background: rgba(88, 101, 242, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(88, 101, 242, 0.4);
+        }
+
+        .export-btn:active {
+            transform: translateY(0);
+        }
+
+        .export-btn i {
+            font-size: 14px;
+        }
+
+        .export-btn.loading {
+            background: rgba(88, 101, 242, 0.6);
+            cursor: not-allowed;
+        }
+
+        .export-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -797,6 +844,11 @@
                         <i class="fas fa-search"></i>
                         <input type="text" placeholder="搜索消息..." />
                     </div>
+                    <!-- 导出聊天记录按钮 -->
+                    <button class="export-btn" onclick="exportChatHistory()" title="导出聊天记录">
+                        <i class="fas fa-download"></i>
+                        <span id="exportBtnText">导出</span>
+                    </button>
                     <!-- 语言切换按钮 -->
                     <div class="language-switcher">
                         <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">中文</button>
@@ -2057,7 +2109,12 @@
                     member: '成员',
                     loading: '加载中...',
                     chinese: '中文',
-                    english: 'English'
+                    english: 'English',
+                    export: '导出',
+                    export_chat_history: '导出聊天记录',
+                    exporting: '导出中...',
+                    export_success: '聊天记录导出成功！',
+                    export_failed: '导出失败，请重试'
                 },
                 en: {
                     page_title: 'Chat Room',
@@ -2092,7 +2149,12 @@
                     member: 'Member',
                     loading: 'Loading...',
                     chinese: '中文',
-                    english: 'English'
+                    english: 'English',
+                    export: 'Export',
+                    export_chat_history: 'Export Chat History',
+                    exporting: 'Exporting...',
+                    export_success: 'Chat history exported successfully!',
+                    export_failed: 'Export failed, please try again'
                 }
             };
             return translations[lang] || translations.zh;
@@ -2101,6 +2163,135 @@
         // 获取翻译文本
         function t(key) {
             return translations[key] || key;
+        }
+
+        // 导出聊天记录
+        async function exportChatHistory() {
+            const exportBtn = document.querySelector('.export-btn');
+            const exportBtnText = document.getElementById('exportBtnText');
+            
+            // 设置加载状态
+            exportBtn.classList.add('loading');
+            exportBtn.disabled = true;
+            exportBtnText.textContent = t('exporting');
+            
+            try {
+                // 获取房间信息
+                const roomResponse = await fetch(`/api/rooms/${currentRoomId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!roomResponse.ok) {
+                    throw new Error('获取房间信息失败');
+                }
+                
+                const room = await roomResponse.json();
+                
+                // 获取聊天记录
+                const messagesResponse = await fetch(`/api/rooms/${currentRoomId}/messages`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!messagesResponse.ok) {
+                    throw new Error('获取聊天记录失败');
+                }
+                
+                const messages = await messagesResponse.json();
+                
+                // 生成导出内容
+                const exportContent = generateExportContent(room, messages);
+                
+                // 创建并下载文件
+                downloadFile(exportContent, `chat_history_${room.name}_${new Date().toISOString().split('T')[0]}.txt`);
+                
+                // 显示成功消息
+                showNotification(t('export_success'));
+                
+            } catch (error) {
+                console.error('导出聊天记录失败:', error);
+                showNotification(t('export_failed'));
+            } finally {
+                // 恢复按钮状态
+                exportBtn.classList.remove('loading');
+                exportBtn.disabled = false;
+                exportBtnText.textContent = t('export');
+            }
+        }
+        
+        // 生成导出内容
+        function generateExportContent(room, messages) {
+            const now = new Date();
+            const exportTime = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            let content = `聊天记录导出报告\n`;
+            content += `================================\n\n`;
+            content += `房间信息:\n`;
+            content += `- 房间名称: ${room.name}\n`;
+            content += `- 房间描述: ${room.description || '暂无描述'}\n`;
+            content += `- 房间ID: ${room.id}\n`;
+            content += `- 创建时间: ${new Date(room.created_at).toLocaleString('zh-CN')}\n`;
+            content += `- 导出时间: ${exportTime}\n`;
+            content += `- 总消息数: ${messages.length}\n\n`;
+            content += `聊天记录:\n`;
+            content += `================================\n\n`;
+            
+            if (messages.length === 0) {
+                content += `暂无聊天记录\n`;
+            } else {
+                messages.forEach((message, index) => {
+                    const messageTime = new Date(message.timestamp).toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                    
+                    content += `[${index + 1}] ${messageTime}\n`;
+                    content += `发送者: ${message.author}\n`;
+                    content += `内容: ${message.content}\n`;
+                    
+                    // 如果有干预信息，也包含进去
+                    if (message.has_interruption) {
+                        content += `打断类型: ${message.interruption_type || '未知'}\n`;
+                    }
+                    if (message.intervention_applied) {
+                        content += `已应用干预: 是\n`;
+                    }
+                    
+                    content += `\n`;
+                });
+            }
+            
+            content += `\n================================\n`;
+            content += `导出完成 - ${exportTime}\n`;
+            
+            return content;
+        }
+        
+        // 下载文件
+        function downloadFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
 
         // 更新界面文本
@@ -2133,16 +2324,24 @@
                 console.log('搜索框占位符已更新为:', t('search_messages'));
             }
             
+            // 更新导出按钮文本
+            const exportBtnText = document.getElementById('exportBtnText');
+            if (exportBtnText) {
+                exportBtnText.textContent = t('export');
+            }
+            
             // 更新图标标题
             const bellSlashIcon = document.querySelector('.fa-bell-slash');
             const bellIcon = document.querySelector('.fa-bell');
             const thumbtackIcon = document.querySelector('.fa-thumbtack');
             const usersIcon = document.querySelector('.fa-users');
+            const exportBtn = document.querySelector('.export-btn');
             
             if (bellSlashIcon) bellSlashIcon.title = t('mute_notifications');
             if (bellIcon) bellIcon.title = t('notification_settings');
             if (thumbtackIcon) thumbtackIcon.title = t('pin_message');
             if (usersIcon) usersIcon.title = t('member_list');
+            if (exportBtn) exportBtn.title = t('export_chat_history');
             
             // 更新欢迎消息
             const startChattingText = document.getElementById('startChattingText');
