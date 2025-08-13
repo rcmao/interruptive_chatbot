@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">TKI性别意识智能干预聊天机器人</title>
+    <title id="pageTitle">MainPage</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -468,8 +468,7 @@
 <body>
     <!-- 登录/注册界面 -->
     <div id="authContainer" class="auth-container">
-        <h1><i class="fas fa-robot"></i> <span id="appTitle">TKI智能干预机器人</span></h1>
-        <p style="color: #666; margin-bottom: 30px;" id="appSubtitle">基于Thomas-Kilmann冲突管理模型的性别结构性边缘化干预系统</p>
+        <h1><i class="fas fa-comments"></i></h1>
         
         <div id="loginForm">
             <div class="form-group">
@@ -481,7 +480,6 @@
                 <input type="password" id="loginPassword" placeholder="请输入密码">
             </div>
             <button class="auth-button" onclick="login()" id="loginButton">登录</button>
-            <p id="noAccountText">还没有账号？ <a href="/register" class="auth-switch" id="registerNowText" style="color: #5865f2; text-decoration: underline; font-weight: bold;">立即注册</a></p>
         </div>
 
         <div id="registerForm" style="display: none;">
@@ -995,10 +993,86 @@
         async function loadTranslations(lang) {
             try {
                 const response = await fetch(`/api/translations/${lang}`);
-                translations = await response.json();
+                if (response.ok) {
+                    translations = await response.json();
+                } else {
+                    // 如果API调用失败，使用内置翻译
+                    translations = getBuiltInTranslations(lang);
+                }
             } catch (error) {
                 console.error('加载翻译失败:', error);
+                // 如果API调用失败，使用内置翻译
+                translations = getBuiltInTranslations(lang);
             }
+        }
+
+        // 获取内置翻译
+        function getBuiltInTranslations(lang) {
+            const translations = {
+                zh: {
+                    page_title: 'TKI性别意识智能干预聊天机器人',
+                    app_title: 'TKI智能干预机器人',
+                    app_subtitle: '基于Thomas-Kilmann冲突管理模型的性别结构性边缘化干预系统',
+                    username: '用户名',
+                    password: '密码',
+                    login: '登录',
+                    register: '注册',
+                    email: '邮箱',
+                    invite_code: '邀请码',
+                    invite_code_placeholder: '请输入邀请码（可选）',
+                    no_account: '还没有账号？',
+                    register_now: '立即注册',
+                    has_account: '已有账号？',
+                    login_now: '立即登录',
+                    missing_fields: '请填写所有必填字段',
+                    login_success: '登录成功！',
+                    login_failed: '登录失败，请重试',
+                    register_success: '注册成功！',
+                    register_failed: '注册失败，请重试',
+                    conversations: '对话列表',
+                    analysis: '分析报告',
+                    new_conversation: '新建对话',
+                    settings: '设置',
+                    select_conversation: '选择或创建一个对话开始聊天',
+                    message_placeholder: '输入消息...',
+                    send_message: '发送消息',
+                    new_conversation_title: '新对话',
+                    no_conversation: '请先选择一个对话',
+                    analysis_report: '分析报告'
+                },
+                en: {
+                    page_title: 'TKI Gender-Aware Intelligent Intervention Chatbot',
+                    app_title: 'TKI Intelligent Intervention Bot',
+                    app_subtitle: 'Gender Structural Marginalization Intervention System based on Thomas-Kilmann Conflict Management Model',
+                    username: 'Username',
+                    password: 'Password',
+                    login: 'Login',
+                    register: 'Register',
+                    email: 'Email',
+                    invite_code: 'Invite Code',
+                    invite_code_placeholder: 'Enter invite code (optional)',
+                    no_account: 'No account yet?',
+                    register_now: 'Register Now',
+                    has_account: 'Already have an account?',
+                    login_now: 'Login Now',
+                    missing_fields: 'Please fill in all required fields',
+                    login_success: 'Login successful!',
+                    login_failed: 'Login failed, please try again',
+                    register_success: 'Registration successful!',
+                    register_failed: 'Registration failed, please try again',
+                    conversations: 'Conversations',
+                    analysis: 'Analysis',
+                    new_conversation: 'New Conversation',
+                    settings: 'Settings',
+                    select_conversation: 'Select or create a conversation to start chatting',
+                    message_placeholder: 'Type a message...',
+                    send_message: 'Send Message',
+                    new_conversation_title: 'New Conversation',
+                    no_conversation: 'Please select a conversation first',
+                    analysis_report: 'Analysis Report'
+                }
+            };
+            return translations[lang] || translations.zh;
         }
 
         // 获取翻译文本
@@ -1010,8 +1084,6 @@
         function updateUIText() {
             // 更新页面标题
             document.getElementById('pageTitle').textContent = t('page_title');
-            document.getElementById('appTitle').textContent = t('app_title');
-            document.getElementById('appSubtitle').textContent = t('app_subtitle');
             
             // 更新登录表单
             document.getElementById('loginUsernameLabel').textContent = t('username');

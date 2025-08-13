@@ -378,6 +378,33 @@
             border-radius: 6px;
             margin-bottom: 20px;
         }
+        /* 语言切换按钮样式 */
+        .language-switcher {
+            display: flex;
+            gap: 8px;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #5865f2;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #dcddde;
+        }
+
+        .lang-btn:hover {
+            background: #5865f2;
+            color: white;
+        }
+
+        .lang-btn.active {
+            background: #5865f2;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -390,6 +417,11 @@
                     <i class="fas fa-plus"></i>
                     创建房间
                 </button>
+                <!-- 语言切换按钮 -->
+                <div class="language-switcher">
+                    <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">🇨🇳 中文</button>
+                    <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">🇬🇧 English</button>
+                </div>
                 <!-- 用户信息区域 -->
                 <div class="user-info-header" onclick="goToProfile()" title="点击编辑个人资料">
                     <div class="user-avatar-header" id="userAvatarHeader">
@@ -404,27 +436,8 @@
             </div>
         </div>
 
-        <!-- 快速操作区域 -->
-        <div class="quick-actions" style="margin-bottom: 30px; padding: 20px; background: #2f3136; border-radius: 12px; border: 1px solid #40444b;">
-            <h3 style="margin-bottom: 15px; color: #ffffff; font-size: 16px;">
-                <i class="fas fa-bolt"></i> 快速操作
-            </h3>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <button class="action-btn join-btn" onclick="joinDefaultRoom()" style="flex: 1; min-width: 200px;">
-                    <i class="fas fa-sign-in-alt"></i>
-                    加入默认聊天室
-                </button>
-                <button class="action-btn edit-btn" onclick="goToProfile()" style="flex: 1; min-width: 200px;">
-                    <i class="fas fa-user-edit"></i>
-                    编辑个人资料
-                </button>
-                <button class="action-btn" onclick="goToAdmin()" id="adminBtn" style="flex: 1; min-width: 200px; background: #5865f2; color: white; display: none;">
-                    <i class="fas fa-shield-alt"></i>
-                    管理员面板
-                </button>
-            </div>
-        </div>
-
+        <!-- 删除整个快速操作区域 -->
+        
         <div id="messageContainer"></div>
 
         <div id="roomsContainer" class="rooms-grid">
@@ -438,30 +451,30 @@
     <div id="createModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">创建新房间</h2>
+                <h2 class="modal-title" id="createModalTitle">创建新房间</h2>
                 <span class="close" onclick="closeModal('createModal')">&times;</span>
             </div>
             <form id="createRoomForm">
                 <div class="form-group">
-                    <label class="form-label" for="roomName">房间名称</label>
+                    <label class="form-label" for="roomName" id="roomNameLabel">房间名称</label>
                     <input type="text" id="roomName" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="roomDescription">房间描述</label>
+                    <label class="form-label" for="roomDescription" id="roomDescriptionLabel">房间描述</label>
                     <textarea id="roomDescription" class="form-input form-textarea" placeholder="描述房间的用途和规则..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="maxMembers">最大成员数</label>
+                    <label class="form-label" for="maxMembers" id="maxMembersLabel">最大成员数</label>
                     <input type="number" id="maxMembers" class="form-input" min="2" max="50" value="10">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
-                        <input type="checkbox" id="isPrivate"> 私有房间
+                    <label class="form-label" id="privateRoomLabel">
+                        <input type="checkbox" id="isPrivate"> <span id="privateRoomText">私有房间</span>
                     </label>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('createModal')">取消</button>
-                    <button type="submit" class="btn btn-primary">创建房间</button>
+                    <button type="button" class="btn btn-secondary" id="cancelCreateBtn">取消</button>
+                    <button type="submit" class="btn btn-primary" id="createRoomBtn">创建房间</button>
                 </div>
             </form>
         </div>
@@ -471,37 +484,41 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">编辑房间</h2>
+                <h2 class="modal-title" id="editModalTitle">编辑房间</h2>
                 <span class="close" onclick="closeModal('editModal')">&times;</span>
             </div>
             <form id="editRoomForm">
                 <input type="hidden" id="editRoomId">
                 <div class="form-group">
-                    <label class="form-label" for="editRoomName">房间名称</label>
+                    <label class="form-label" for="editRoomName" id="editRoomNameLabel">房间名称</label>
                     <input type="text" id="editRoomName" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="editRoomDescription">房间描述</label>
+                    <label class="form-label" for="editRoomDescription" id="editRoomDescriptionLabel">房间描述</label>
                     <textarea id="editRoomDescription" class="form-input form-textarea"></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="editMaxMembers">最大成员数</label>
+                    <label class="form-label" for="editMaxMembers" id="editMaxMembersLabel">最大成员数</label>
                     <input type="number" id="editMaxMembers" class="form-input" min="2" max="50">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
-                        <input type="checkbox" id="editIsPrivate"> 私有房间
+                    <label class="form-label" id="editPrivateRoomLabel">
+                        <input type="checkbox" id="editIsPrivate"> <span id="editPrivateRoomText">私有房间</span>
                     </label>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">取消</button>
-                    <button type="submit" class="btn btn-primary">保存更改</button>
+                    <button type="button" class="btn btn-secondary" id="cancelEditBtn">取消</button>
+                    <button type="submit" class="btn btn-primary" id="saveChangesBtn">保存更改</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        let currentUser = null;
+        let currentLanguage = 'zh';
+        let translations = {};
+
         // 检查登录状态
         window.onload = function() {
             const token = localStorage.getItem('token');
@@ -509,9 +526,176 @@
                 window.location.href = '/';
                 return;
             }
+            
+            // 加载保存的语言设置
+            const savedLanguage = localStorage.getItem('language') || 'zh';
+            switchLanguage(savedLanguage);
+            
             loadUserInfo();
             loadRooms();
         };
+
+        // 语言切换功能
+        async function switchLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            
+            // 更新按钮状态
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(lang + 'Btn').classList.add('active');
+            
+            // 加载翻译
+            await loadTranslations(lang);
+            
+            // 更新界面文本
+            updateUIText();
+        }
+
+        // 加载翻译
+        async function loadTranslations(lang) {
+            try {
+                const response = await fetch(`/api/translations/${lang}`);
+                if (response.ok) {
+                    translations = await response.json();
+                } else {
+                    translations = getBuiltInTranslations(lang);
+                }
+            } catch (error) {
+                console.error('加载翻译失败:', error);
+                translations = getBuiltInTranslations(lang);
+            }
+        }
+
+        // 获取内置翻译
+        function getBuiltInTranslations(lang) {
+            const translations = {
+                zh: {
+                    page_title: '房间管理 - TKI智能干预聊天机器人',
+                    room_management: '房间管理',
+                    welcome_back: '欢迎回来',
+                    create_room: '创建房间',
+                    quick_actions: '快速操作',
+                    join_default_room: '加入默认聊天室',
+                    edit_profile: '编辑个人资料',
+                    admin_panel: '管理员面板',
+                    loading: '加载中...',
+                    no_rooms: '还没有房间，创建第一个房间开始测试吧！',
+                    no_description: '暂无描述',
+                    room_name: '房间名称',
+                    room_description: '房间描述',
+                    room_description_placeholder: '描述房间的用途和规则...',
+                    max_members: '最大成员数',
+                    private_room: '私有房间',
+                    cancel: '取消',
+                    create: '创建',
+                    edit_room: '编辑房间',
+                    save_changes: '保存更改',
+                    members: '成员',
+                    max_capacity: '最大容量',
+                    created_time: '创建时间',
+                    join_room: '加入房间',
+                    delete_room: '删除房间',
+                    confirm_delete: '确定要删除这个房间吗？此操作不可撤销。',
+                    room_created: '房间创建成功！',
+                    room_updated: '房间更新成功！',
+                    room_deleted: '房间删除成功！',
+                    create_failed: '创建房间失败',
+                    update_failed: '更新房间失败',
+                    delete_failed: '删除房间失败',
+                    network_error: '网络错误',
+                    loading_failed: '加载房间列表失败',
+                    admin: '管理员',
+                    member: '成员'
+                },
+                en: {
+                    page_title: 'Room Management - TKI Intelligent Intervention Chatbot',
+                    room_management: 'Room Management',
+                    welcome_back: 'Welcome back',
+                    create_room: 'Create Room',
+                    quick_actions: 'Quick Actions',
+                    join_default_room: 'Join Default Chat Room',
+                    edit_profile: 'Edit Profile',
+                    admin_panel: 'Admin Panel',
+                    loading: 'Loading...',
+                    no_rooms: 'No rooms yet, create the first room to start testing!',
+                    no_description: 'No description',
+                    room_name: 'Room Name',
+                    room_description: 'Room Description',
+                    room_description_placeholder: 'Describe the purpose and rules of the room...',
+                    max_members: 'Max Members',
+                    private_room: 'Private Room',
+                    cancel: 'Cancel',
+                    create: 'Create',
+                    edit_room: 'Edit Room',
+                    save_changes: 'Save Changes',
+                    members: 'Members',
+                    max_capacity: 'Max Capacity',
+                    created_time: 'Created Time',
+                    join_room: 'Join Room',
+                    delete_room: 'Delete Room',
+                    confirm_delete: 'Are you sure you want to delete this room? This action cannot be undone.',
+                    room_created: 'Room created successfully!',
+                    room_updated: 'Room updated successfully!',
+                    room_deleted: 'Room deleted successfully!',
+                    create_failed: 'Failed to create room',
+                    update_failed: 'Failed to update room',
+                    delete_failed: 'Failed to delete room',
+                    network_error: 'Network error',
+                    loading_failed: 'Failed to load room list',
+                    admin: 'Admin',
+                    member: 'Member'
+                }
+            };
+            return translations[lang] || translations.zh;
+        }
+
+        // 获取翻译文本
+        function t(key) {
+            return translations[key] || key;
+        }
+
+        // 更新界面文本
+        function updateUIText() {
+            // 更新页面标题
+            document.title = t('page_title');
+            document.querySelector('h1').innerHTML = `<i class="fas fa-door-open"></i> ${t('room_management')}`;
+            
+            // 更新欢迎消息 - 使用已加载的用户信息或从localStorage获取
+            const username = currentUser ? (currentUser.display_name || currentUser.username) : 
+                           (localStorage.getItem('username') || 'User');
+            document.getElementById('welcomeText').textContent = `${t('welcome_back')}, ${username}!`;
+            
+            document.querySelector('.create-room-btn').innerHTML = `<i class="fas fa-plus"></i> ${t('create_room')}`;
+            
+            // 更新创建房间模态框
+            document.getElementById('createModalTitle').textContent = t('create_room');
+            document.getElementById('roomNameLabel').textContent = t('room_name');
+            document.getElementById('roomDescriptionLabel').textContent = t('room_description');
+            document.getElementById('maxMembersLabel').textContent = t('max_members');
+            document.getElementById('privateRoomText').textContent = t('private_room');
+            document.getElementById('cancelCreateBtn').textContent = t('cancel');
+            document.getElementById('createRoomBtn').textContent = t('create');
+            
+            // 更新编辑房间模态框
+            document.getElementById('editModalTitle').textContent = t('edit_room');
+            document.getElementById('editRoomNameLabel').textContent = t('room_name');
+            document.getElementById('editRoomDescriptionLabel').textContent = t('room_description');
+            document.getElementById('editMaxMembersLabel').textContent = t('max_members');
+            document.getElementById('editPrivateRoomText').textContent = t('private_room');
+            document.getElementById('cancelEditBtn').textContent = t('cancel');
+            document.getElementById('saveChangesBtn').textContent = t('save_changes');
+            
+            // 更新占位符文本
+            document.getElementById('roomDescription').placeholder = t('room_description_placeholder');
+            
+            // 更新加载状态
+            const loadingElement = document.querySelector('.loading');
+            if (loadingElement) {
+                loadingElement.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('loading')}`;
+            }
+        }
 
         // 加载用户信息
         async function loadUserInfo() {
@@ -524,7 +708,12 @@
                 
                 if (response.ok) {
                     const user = await response.json();
-                    document.getElementById('welcomeText').textContent = `欢迎回来，${user.display_name || user.username}！`;
+                    currentUser = user; // 保存到全局变量
+                    
+                    // 保存用户名到localStorage作为备用
+                    localStorage.setItem('username', user.display_name || user.username);
+                    
+                    document.getElementById('welcomeText').textContent = `${t('welcome_back')}, ${user.display_name || user.username}!`;
                     
                     // 更新头部用户信息
                     updateHeaderUserInfo(user);
@@ -556,7 +745,7 @@
             usernameHeader.textContent = user.display_name || user.username;
             
             // 更新用户角色
-            userRoleHeader.textContent = user.role === 'admin' ? '管理员' : '成员';
+            userRoleHeader.textContent = user.role === 'admin' ? t('admin') : t('member');
         }
 
         // 加载房间列表
@@ -575,11 +764,11 @@
                     const rooms = await response.json();
                     displayRooms(rooms);
                 } else {
-                    showMessage('加载房间列表失败', 'error');
+                    showMessage(t('loading_failed'), 'error');
                 }
             } catch (error) {
                 console.error('加载房间失败:', error);
-                showMessage('网络错误', 'error');
+                showMessage(t('network_error'), 'error');
             }
         }
 
@@ -591,7 +780,7 @@
                 container.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #96989d;">
                         <i class="fas fa-door-closed" style="font-size: 48px; margin-bottom: 20px;"></i>
-                        <p>还没有房间，创建第一个房间开始测试吧！</p>
+                        <p>${t('no_rooms')}</p>
                     </div>
                 `;
                 return;
@@ -602,7 +791,7 @@
                     <div class="room-header">
                         <div>
                             <div class="room-name">${room.name}</div>
-                            <div class="room-description">${room.description || '暂无描述'}</div>
+                            <div class="room-description">${room.description || t('no_description')}</div>
                         </div>
                         <div class="room-actions">
                             <button class="action-btn edit-btn" onclick="event.stopPropagation(); editRoom(${room.id})">
@@ -616,20 +805,20 @@
                     <div class="room-stats">
                         <div class="stat-item">
                             <div class="stat-value">${room.member_count}</div>
-                            <div class="stat-label">成员</div>
+                            <div class="stat-label">${t('members')}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value">${room.max_members}</div>
-                            <div class="stat-label">最大容量</div>
+                            <div class="stat-label">${t('max_capacity')}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value">${new Date(room.created_at).toLocaleDateString()}</div>
-                            <div class="stat-label">创建时间</div>
+                            <div class="stat-label">${t('created_time')}</div>
                         </div>
                     </div>
                     <div class="room-actions">
                         <button class="action-btn join-btn" onclick="event.stopPropagation(); joinRoom(${room.id})">
-                            <i class="fas fa-sign-in-alt"></i> 加入房间
+                            <i class="fas fa-sign-in-alt"></i> ${t('join_room')}
                         </button>
                     </div>
                 </div>
@@ -668,17 +857,17 @@
                 });
 
                 if (response.ok) {
-                    showMessage('房间创建成功！', 'success');
+                    showMessage(t('room_created'), 'success');
                     closeModal('createModal');
                     document.getElementById('createRoomForm').reset();
                     loadRooms();
                 } else {
                     const error = await response.json();
-                    showMessage(error.error || '创建房间失败', 'error');
+                    showMessage(error.error || t('create_failed'), 'error');
                 }
             } catch (error) {
                 console.error('创建房间失败:', error);
-                showMessage('网络错误', 'error');
+                showMessage(t('network_error'), 'error');
             }
         });
 
@@ -705,16 +894,16 @@
                 });
 
                 if (response.ok) {
-                    showMessage('房间更新成功！', 'success');
+                    showMessage(t('room_updated'), 'success');
                     closeModal('editModal');
                     loadRooms();
                 } else {
                     const error = await response.json();
-                    showMessage(error.error || '更新房间失败', 'error');
+                    showMessage(error.error || t('update_failed'), 'error');
                 }
             } catch (error) {
                 console.error('更新房间失败:', error);
-                showMessage('网络错误', 'error');
+                showMessage(t('network_error'), 'error');
             }
         });
 
@@ -751,7 +940,7 @@
 
         // 删除房间
         async function deleteRoom(roomId) {
-            if (!confirm('确定要删除这个房间吗？此操作不可撤销。')) {
+            if (!confirm(t('confirm_delete'))) {
                 return;
             }
 
@@ -764,15 +953,15 @@
                 });
 
                 if (response.ok) {
-                    showMessage('房间删除成功！', 'success');
+                    showMessage(t('room_deleted'), 'success');
                     loadRooms();
                 } else {
                     const error = await response.json();
-                    showMessage(error.error || '删除房间失败', 'error');
+                    showMessage(error.error || t('delete_failed'), 'error');
                 }
             } catch (error) {
                 console.error('删除房间失败:', error);
-                showMessage('网络错误', 'error');
+                showMessage(t('network_error'), 'error');
             }
         }
 

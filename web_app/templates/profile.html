@@ -324,10 +324,11 @@
         <div class="header">
             <h1><i class="fas fa-user-edit"></i> 用户资料</h1>
             <div style="display: flex; gap: 10px;">
-                <a href="/dashboard" class="nav-btn">
-                    <i class="fas fa-chart-line"></i>
-                    数据统计
-                </a>
+                <!-- 语言切换按钮 -->
+                <div class="language-switcher">
+                    <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">🇨🇳 中文</button>
+                    <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">🇬🇧 English</button>
+                </div>
                 <a href="/rooms" class="nav-btn">
                     <i class="fas fa-door-open"></i>
                     房间管理
@@ -385,19 +386,19 @@
                     <div class="form-group">
                         <label class="form-label" for="username">用户名（登录名）</label>
                         <input type="text" id="username" class="form-input" readonly style="background-color: #2f3136; color: #96989d; cursor: not-allowed;">
-                        <small style="color: #96989d; font-size: 12px;">用户名不可修改，用于登录</small>
+                        <small style="color: #96989d; font-size: 12px;" id="usernameHint">用户名不可修改，用于登录</small>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="displayName">显示名称</label>
                         <input type="text" id="displayName" class="form-input" placeholder="在聊天中显示的名称">
-                        <small style="color: #96989d; font-size: 12px;">如果不填写，将使用用户名</small>
+                        <small style="color: #96989d; font-size: 12px;" id="displayNameHint">如果不填写，将使用用户名</small>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="email">邮箱</label>
                         <input type="email" id="email" class="form-input" readonly style="background-color: #2f3136; color: #96989d; cursor: not-allowed;">
-                        <small style="color: #96989d; font-size: 12px;">邮箱不可修改</small>
+                        <small style="color: #96989d; font-size: 12px;" id="emailHint">邮箱不可修改</small>
                     </div>
 
                     <div class="form-group">
@@ -407,7 +408,7 @@
                             <option value="male">男性</option>
                             <option value="female">女性</option>
                         </select>
-                        <small style="color: #96989d; font-size: 12px;">选择您的性别</small>
+                        <small style="color: #96989d; font-size: 12px;" id="genderHint">选择您的性别</small>
                     </div>
 
                     <div class="form-group">
@@ -416,13 +417,13 @@
                             <option value="tester">测试者</option>
                             <option value="observer">观察者</option>
                         </select>
-                        <small style="color: #96989d; font-size: 12px;">用户类型不可修改</small>
+                        <small style="color: #96989d; font-size: 12px;" id="userTypeHint">用户类型不可修改</small>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="bio">个人简介</label>
                         <textarea id="bio" class="form-input" rows="3" placeholder="介绍一下自己..." readonly style="background-color: #2f3136; color: #96989d; cursor: not-allowed;"></textarea>
-                        <small style="color: #96989d; font-size: 12px;">个人简介不可修改</small>
+                        <small style="color: #96989d; font-size: 12px;" id="bioHint">个人简介不可修改</small>
                     </div>
 
                     <div class="form-actions">
@@ -444,6 +445,8 @@
     <script>
         let currentUser = null;
         let originalData = null;
+        let currentLanguage = 'zh';
+        let translations = {};
 
         // 检查登录状态
         window.onload = function() {
@@ -453,8 +456,192 @@
                 return;
             }
             
+            // 加载保存的语言设置
+            const savedLanguage = localStorage.getItem('language') || 'zh';
+            switchLanguage(savedLanguage);
+            
             loadUserProfile();
         };
+
+        // 语言切换功能
+        async function switchLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            
+            // 更新按钮状态
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(lang + 'Btn').classList.add('active');
+            
+            // 加载翻译
+            await loadTranslations(lang);
+            
+            // 更新界面文本
+            updateUIText();
+        }
+
+        // 加载翻译
+        async function loadTranslations(lang) {
+            try {
+                const response = await fetch(`/api/translations/${lang}`);
+                if (response.ok) {
+                    translations = await response.json();
+                } else {
+                    translations = getBuiltInTranslations(lang);
+                }
+            } catch (error) {
+                console.error('加载翻译失败:', error);
+                translations = getBuiltInTranslations(lang);
+            }
+        }
+
+        // 获取内置翻译
+        function getBuiltInTranslations(lang) {
+            const translations = {
+                zh: {
+                    page_title: '用户资料 - TKI智能干预聊天机器人',
+                    user_profile: '用户资料',
+                    data_statistics: '数据统计',
+                    room_management: '房间管理',
+                    return_home: '返回首页',
+                    message_count: '消息数',
+                    room_count: '房间数',
+                    join_time: '加入时间',
+                    edit_profile: '编辑资料（显示名称、性别和头像）',
+                    username: '用户名（登录名）',
+                    username_readonly: '用户名不可修改，用于登录',
+                    display_name: '显示名称',
+                    display_name_placeholder: '在聊天中显示的名称',
+                    display_name_hint: '如果不填写，将使用用户名',
+                    email: '邮箱',
+                    email_readonly: '邮箱不可修改',
+                    gender: '性别',
+                    gender_hint: '选择您的性别',
+                    user_type: '用户类型',
+                    user_type_readonly: '用户类型不可修改',
+                    bio: '个人简介',
+                    bio_placeholder: '介绍一下自己...',
+                    bio_readonly: '个人简介不可修改',
+                    save_changes: '保存更改',
+                    reset: '重置',
+                    return_rooms: '返回房间管理',
+                    upload: '上传',
+                    reset_avatar: '重置',
+                    unknown: '未知',
+                    male: '男性',
+                    female: '女性',
+                    tester: '测试者',
+                    observer: '观察者',
+                    profile_updated: '资料更新成功！正在跳转到房间管理...',
+                    update_failed: '更新失败',
+                    network_error: '网络错误',
+                    loading_failed: '加载用户资料失败'
+                },
+                en: {
+                    page_title: 'User Profile - TKI Intelligent Intervention Chatbot',
+                    user_profile: 'User Profile',
+                    data_statistics: 'Data Statistics',
+                    room_management: 'Room Management',
+                    return_home: 'Return Home',
+                    message_count: 'Messages',
+                    room_count: 'Rooms',
+                    join_time: 'Join Time',
+                    edit_profile: 'Edit Profile (Display Name, Gender and Avatar)',
+                    username: 'Username (Login Name)',
+                    username_readonly: 'Username cannot be modified, used for login',
+                    display_name: 'Display Name',
+                    display_name_placeholder: 'Name displayed in chat',
+                    display_name_hint: 'If not filled, username will be used',
+                    email: 'Email',
+                    email_readonly: 'Email cannot be modified',
+                    gender: 'Gender',
+                    gender_hint: 'Select your gender',
+                    user_type: 'User Type',
+                    user_type_readonly: 'User type cannot be modified',
+                    bio: 'Bio',
+                    bio_placeholder: 'Introduce yourself...',
+                    bio_readonly: 'Bio cannot be modified',
+                    save_changes: 'Save Changes',
+                    reset: 'Reset',
+                    return_rooms: 'Return to Room Management',
+                    upload: 'Upload',
+                    reset_avatar: 'Reset',
+                    unknown: 'Unknown',
+                    male: 'Male',
+                    female: 'Female',
+                    tester: 'Tester',
+                    observer: 'Observer',
+                    profile_updated: 'Profile updated successfully! Redirecting to room management...',
+                    update_failed: 'Update failed',
+                    network_error: 'Network error',
+                    loading_failed: 'Failed to load user profile'
+                }
+            };
+            return translations[lang] || translations.zh;
+        }
+
+        // 获取翻译文本
+        function t(key) {
+            return translations[key] || key;
+        }
+
+        // 更新界面文本
+        function updateUIText() {
+            // 更新页面标题
+            document.title = t('page_title');
+            document.querySelector('h1').innerHTML = `<i class="fas fa-user-edit"></i> ${t('user_profile')}`;
+            
+            // 更新导航按钮
+            document.querySelector('a[href="/rooms"]').innerHTML = `<i class="fas fa-door-open"></i> ${t('room_management')}`;
+            document.querySelector('a[href="/"]').innerHTML = `<i class="fas fa-home"></i> ${t('return_home')}`;
+            
+            // 更新统计标签
+            document.querySelector('.stat-label').textContent = t('message_count');
+            document.querySelectorAll('.stat-label')[1].textContent = t('room_count');
+            document.querySelectorAll('.stat-label')[2].textContent = t('join_time');
+            
+            // 更新表单标题和标签
+            document.querySelector('.form-title').textContent = t('edit_profile');
+            document.querySelector('label[for="username"]').textContent = t('username');
+            document.querySelector('label[for="displayName"]').textContent = t('display_name');
+            document.querySelector('label[for="email"]').textContent = t('email');
+            document.querySelector('label[for="gender"]').textContent = t('gender');
+            document.querySelector('label[for="userType"]').textContent = t('user_type');
+            document.querySelector('label[for="bio"]').textContent = t('bio');
+            
+            // 更新占位符和提示
+            document.getElementById('displayName').placeholder = t('display_name_placeholder');
+            document.getElementById('bio').placeholder = t('bio_placeholder');
+            
+            // 更新帮助文本
+            document.getElementById('usernameHint').textContent = t('username_readonly');
+            document.getElementById('displayNameHint').textContent = t('display_name_hint');
+            document.getElementById('emailHint').textContent = t('email_readonly');
+            document.getElementById('genderHint').textContent = t('gender_hint');
+            document.getElementById('userTypeHint').textContent = t('user_type_readonly');
+            document.getElementById('bioHint').textContent = t('bio_readonly');
+            
+            // 更新按钮
+            document.querySelector('.btn-primary').innerHTML = `<i class="fas fa-save"></i> ${t('save_changes')}`;
+            document.querySelector('.btn-secondary').innerHTML = `<i class="fas fa-undo"></i> ${t('reset')}`;
+            document.querySelectorAll('.btn-secondary')[1].innerHTML = `<i class="fas fa-door-open"></i> ${t('return_rooms')}`;
+            
+            // 更新头像按钮
+            document.querySelector('.avatar-btn').innerHTML = `<i class="fas fa-upload"></i> ${t('upload')}`;
+            document.querySelectorAll('.avatar-btn')[1].innerHTML = `<i class="fas fa-undo"></i> ${t('reset_avatar')}`;
+            
+            // 更新性别选项
+            const genderSelect = document.getElementById('gender');
+            genderSelect.options[0].text = t('unknown');
+            genderSelect.options[1].text = t('male');
+            genderSelect.options[2].text = t('female');
+            
+            // 更新用户类型选项
+            const userTypeSelect = document.getElementById('userType');
+            userTypeSelect.options[0].text = t('tester');
+            userTypeSelect.options[1].text = t('observer');
+        }
 
         // 加载用户资料
         async function loadUserProfile() {
