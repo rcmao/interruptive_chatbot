@@ -14,22 +14,181 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a0a0a;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 动态星空背景 */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%),
+                linear-gradient(45deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+            background-blend-mode: overlay;
+        }
+
+        /* 添加深空效果 */
+        .stars-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            animation: nebula 20s ease-in-out infinite;
+        }
+
+        @keyframes nebula {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        /* 不同大小的星星有不同的颜色 */
+        .star[style*="width: 1px"] {
+            background: #ffffff;
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.4);
+        }
+
+        .star[style*="width: 2px"] {
+            background: #f0f8ff;
+            box-shadow: 0 0 6px rgba(240, 248, 255, 0.6);
+        }
+
+        .star[style*="width: 3px"] {
+            background: #e6f3ff;
+            box-shadow: 0 0 8px rgba(230, 243, 255, 0.8);
+        }
+
+        .star:nth-child(1) { width: 2px; height: 2px; top: 10%; left: 10%; animation-delay: 0s; }
+        .star:nth-child(2) { width: 1px; height: 1px; top: 20%; left: 20%; animation-delay: 0.5s; }
+        .star:nth-child(3) { width: 3px; height: 3px; top: 30%; left: 30%; animation-delay: 1s; }
+        .star:nth-child(4) { width: 1px; height: 1px; top: 40%; left: 40%; animation-delay: 1.5s; }
+        .star:nth-child(5) { width: 2px; height: 2px; top: 50%; left: 50%; animation-delay: 2s; }
+        .star:nth-child(6) { width: 1px; height: 1px; top: 60%; left: 60%; animation-delay: 2.5s; }
+        .star:nth-child(7) { width: 3px; height: 3px; top: 70%; left: 70%; animation-delay: 0.3s; }
+        .star:nth-child(8) { width: 2px; height: 2px; top: 80%; left: 80%; animation-delay: 0.8s; }
+        .star:nth-child(9) { width: 1px; height: 1px; top: 90%; left: 90%; animation-delay: 1.3s; }
+        .star:nth-child(10) { width: 2px; height: 2px; top: 15%; left: 85%; animation-delay: 1.8s; }
+        .star:nth-child(11) { width: 1px; height: 1px; top: 25%; left: 75%; animation-delay: 0.2s; }
+        .star:nth-child(12) { width: 3px; height: 3px; top: 35%; left: 65%; animation-delay: 0.7s; }
+        .star:nth-child(13) { width: 2px; height: 2px; top: 45%; left: 55%; animation-delay: 1.2s; }
+        .star:nth-child(14) { width: 1px; height: 1px; top: 55%; left: 45%; animation-delay: 1.7s; }
+        .star:nth-child(15) { width: 2px; height: 2px; top: 65%; left: 35%; animation-delay: 0.4s; }
+        .star:nth-child(16) { width: 3px; height: 3px; top: 75%; left: 25%; animation-delay: 0.9s; }
+        .star:nth-child(17) { width: 1px; height: 1px; top: 85%; left: 15%; animation-delay: 1.4s; }
+        .star:nth-child(18) { width: 2px; height: 2px; top: 5%; left: 95%; animation-delay: 1.9s; }
+        .star:nth-child(19) { width: 1px; height: 1px; top: 95%; left: 5%; animation-delay: 0.1s; }
+        .star:nth-child(20) { width: 3px; height: 3px; top: 8%; left: 8%; animation-delay: 0.6s; }
+
+        @keyframes twinkle {
+            0%, 100% { 
+                opacity: 0.3; 
+                transform: scale(1); 
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.2); 
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        /* 添加更多星星 */
+        .star:nth-child(21) { width: 1px; height: 1px; top: 12%; left: 25%; animation-delay: 0.7s; }
+        .star:nth-child(22) { width: 2px; height: 2px; top: 18%; left: 35%; animation-delay: 1.2s; }
+        .star:nth-child(23) { width: 1px; height: 1px; top: 22%; left: 45%; animation-delay: 0.9s; }
+        .star:nth-child(24) { width: 3px; height: 3px; top: 28%; left: 55%; animation-delay: 1.5s; }
+        .star:nth-child(25) { width: 1px; height: 1px; top: 32%; left: 65%; animation-delay: 0.4s; }
+        .star:nth-child(26) { width: 2px; height: 2px; top: 38%; left: 75%; animation-delay: 1.1s; }
+        .star:nth-child(27) { width: 1px; height: 1px; top: 42%; left: 85%; animation-delay: 0.6s; }
+        .star:nth-child(28) { width: 3px; height: 3px; top: 48%; left: 15%; animation-delay: 1.3s; }
+        .star:nth-child(29) { width: 1px; height: 1px; top: 52%; left: 25%; animation-delay: 0.8s; }
+        .star:nth-child(30) { width: 2px; height: 2px; top: 58%; left: 35%; animation-delay: 1.4s; }
+
+
+
+        /* 动态粒子效果 */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 1s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 2s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 3s; }
+        .particle:nth-child(5) { left: 50%; animation-delay: 4s; }
+        .particle:nth-child(6) { left: 60%; animation-delay: 5s; }
+        .particle:nth-child(7) { left: 70%; animation-delay: 0.5s; }
+        .particle:nth-child(8) { left: 80%; animation-delay: 1.5s; }
+        .particle:nth-child(9) { left: 90%; animation-delay: 2.5s; }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(50vh) scale(1);
+                opacity: 1;
+            }
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(47, 49, 54, 0.95);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             overflow: hidden;
             width: 90%;
             max-width: 1200px;
             height: 90vh;
             display: flex;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* 侧边栏样式 */
@@ -71,7 +230,10 @@
         }
 
         .nav-item.active {
-            background: #5865f2;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .nav-item i {
@@ -95,7 +257,8 @@
         }
 
         .conversation-item.active {
-            background: #5865f2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
         }
 
         .conversation-title {
@@ -145,13 +308,14 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #5865f2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: white;
             flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
         }
 
         .message-content {
@@ -208,8 +372,8 @@
 
         .message-input {
             flex: 1;
-            background: #40444b;
-            border: none;
+            background: rgba(64, 68, 75, 0.8);
+            border: 2px solid rgba(102, 126, 234, 0.3);
             border-radius: 8px;
             padding: 12px 16px;
             color: white;
@@ -217,48 +381,110 @@
             resize: none;
             min-height: 44px;
             max-height: 120px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .message-input:focus {
             outline: none;
-            box-shadow: 0 0 0 2px #5865f2;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            background: rgba(64, 68, 75, 0.9);
+        }
+
+        .message-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .send-button {
-            background: #5865f2;
+            background: rgba(255, 255, 255, 0.08);
             color: white;
-            border: none;
-            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
             padding: 12px 20px;
             cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.1),
+                0 2px 6px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .send-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                rgba(255, 255, 255, 0.05) 50%, 
+                rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .send-button:hover {
-            background: #4752c4;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.15),
+                0 4px 12px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .send-button:hover::before {
+            opacity: 1;
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .send-button:disabled {
-            background: #40444b;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
             cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .send-button:disabled::before {
+            display: none;
         }
 
         /* 登录/注册表单 */
         .auth-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(47, 49, 54, 0.95);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             padding: 40px;
             width: 90%;
             max-width: 400px;
             text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
         }
 
         .auth-container h1 {
             color: #5865f2;
             margin-bottom: 30px;
             font-size: 28px;
+            text-shadow: 0 0 10px rgba(88, 101, 242, 0.5);
         }
 
         .form-group {
@@ -270,16 +496,22 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #333;
+            color: #ffffff;
         }
 
         .form-group input {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e1e5e9;
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             font-size: 14px;
             transition: border-color 0.2s;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .form-group input:focus {
@@ -289,20 +521,62 @@
 
         .auth-button {
             width: 100%;
-            background: #5865f2;
+            background: rgba(255, 255, 255, 0.08);
             color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 16px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 15px;
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                rgba(255, 255, 255, 0.05) 50%, 
+                rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .auth-button:hover {
-            background: #4752c4;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                0 4px 12px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .auth-button:hover::before {
+            opacity: 1;
+        }
+
+        .auth-button:active {
+            transform: translateY(0);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .auth-switch {
@@ -369,14 +643,15 @@
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: #5865f2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: white;
             font-size: 12px;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
         }
 
         .user-info:hover .user-avatar {
@@ -413,29 +688,44 @@
             top: 20px;
             right: 20px;
             display: flex;
-            gap: 10px;
+            gap: 6px;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow:
+                0 8px 24px rgba(0,0,0,0.12),
+                inset 0 1px 0 rgba(255,255,255,0.12);
         }
 
         .lang-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid #5865f2;
-            border-radius: 8px;
-            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 18px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            transition: all 0.2s;
-            color: #5865f2;
+            letter-spacing: 0.2px;
+            transition: all 0.25s ease;
+            color: rgba(255, 255, 255, 0.92);
         }
 
         .lang-btn:hover {
-            background: #5865f2;
-            color: white;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
         }
 
         .lang-btn.active {
-            background: #5865f2;
-            color: white;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            box-shadow:
+                0 8px 26px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.25);
         }
 
         /* 响应式设计 */
@@ -466,6 +756,54 @@
     </style>
 </head>
 <body>
+    <!-- 动态星空背景 -->
+    <div class="stars-container">
+        <div class="stars">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+
     <!-- 登录/注册界面 -->
     <div id="authContainer" class="auth-container">
         <h1><i class="fas fa-comments"></i></h1>
@@ -498,19 +836,19 @@
             <div class="form-group">
                 <label for="inviteCode" id="inviteCodeLabel">邀请码</label>
                 <input type="text" id="inviteCode" placeholder="请输入邀请码（可选）">
-                <small style="color: #666; font-size: 12px;">公开注册码：PUBLIC，管理员邀请码请联系管理员</small>
+                <small id="publicCodeText" style="color: rgba(255, 255, 255, 0.6); font-size: 12px;">公开注册码：PUBLIC，管理员邀请码请联系管理员</small>
             </div>
             <button class="auth-button" onclick="register()" id="registerButton">注册</button>
             <p id="hasAccountText">已有账号？ <a href="#" class="auth-switch" onclick="showLogin(); return false;" id="loginNowText" style="color: #5865f2; text-decoration: underline; font-weight: bold;">立即登录</a></p>
         </div>
 
         <div id="authMessage"></div>
-        
-        <!-- 语言切换按钮 -->
-        <div class="language-switcher">
-            <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">🇨🇳 中文</button>
-            <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">🇬🇧 English</button>
-        </div>
+    </div>
+
+    <!-- 语言切换按钮 -->
+    <div class="language-switcher">
+        <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">中文</button>
+        <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">English</button>
     </div>
 
     <!-- 主应用界面 -->
@@ -994,7 +1332,9 @@
             try {
                 const response = await fetch(`/api/translations/${lang}`);
                 if (response.ok) {
-                    translations = await response.json();
+                    const apiTranslations = await response.json();
+                    // 使用内置翻译作为默认值，API 返回的键覆盖默认值，避免缺失键导致占位符显示为 key
+                    translations = { ...getBuiltInTranslations(lang), ...apiTranslations };
                 } else {
                     // 如果API调用失败，使用内置翻译
                     translations = getBuiltInTranslations(lang);
@@ -1015,9 +1355,12 @@
                     app_subtitle: '基于Thomas-Kilmann冲突管理模型的性别结构性边缘化干预系统',
                     username: '用户名',
                     password: '密码',
+                    username_placeholder: '请输入用户名',
+                    password_placeholder: '请输入密码',
                     login: '登录',
                     register: '注册',
                     email: '邮箱',
+                    email_placeholder: '请输入邮箱',
                     invite_code: '邀请码',
                     invite_code_placeholder: '请输入邀请码（可选）',
                     no_account: '还没有账号？',
@@ -1038,7 +1381,8 @@
                     send_message: '发送消息',
                     new_conversation_title: '新对话',
                     no_conversation: '请先选择一个对话',
-                    analysis_report: '分析报告'
+                    analysis_report: '分析报告',
+                    public_code: '公开注册码：PUBLIC，管理员邀请码请联系管理员'
                 },
                 en: {
                     page_title: 'TKI Gender-Aware Intelligent Intervention Chatbot',
@@ -1046,9 +1390,12 @@
                     app_subtitle: 'Gender Structural Marginalization Intervention System based on Thomas-Kilmann Conflict Management Model',
                     username: 'Username',
                     password: 'Password',
+                    username_placeholder: 'Enter username',
+                    password_placeholder: 'Enter password',
                     login: 'Login',
                     register: 'Register',
                     email: 'Email',
+                    email_placeholder: 'Enter email',
                     invite_code: 'Invite Code',
                     invite_code_placeholder: 'Enter invite code (optional)',
                     no_account: 'No account yet?',
@@ -1069,7 +1416,8 @@
                     send_message: 'Send Message',
                     new_conversation_title: 'New Conversation',
                     no_conversation: 'Please select a conversation first',
-                    analysis_report: 'Analysis Report'
+                    analysis_report: 'Analysis Report',
+                    public_code: 'Public code: PUBLIC, admin invite code please contact administrator'
                 }
             };
             return translations[lang] || translations.zh;
@@ -1089,6 +1437,11 @@
             document.getElementById('loginUsernameLabel').textContent = t('username');
             document.getElementById('loginPasswordLabel').textContent = t('password');
             document.getElementById('loginButton').textContent = t('login');
+            // 登录占位符
+            const loginUsernameInput = document.getElementById('loginUsername');
+            if (loginUsernameInput) loginUsernameInput.placeholder = t('username_placeholder');
+            const loginPasswordInput = document.getElementById('loginPassword');
+            if (loginPasswordInput) loginPasswordInput.placeholder = t('password_placeholder');
             document.getElementById('noAccountText').textContent = t('no_account') + ' ';
             document.getElementById('registerNowText').textContent = t('register_now');
             
@@ -1099,8 +1452,21 @@
             document.getElementById('inviteCodeLabel').textContent = t('invite_code');
             document.getElementById('inviteCode').placeholder = t('invite_code_placeholder');
             document.getElementById('registerButton').textContent = t('register');
+            // 注册占位符
+            const registerUsernameInput = document.getElementById('registerUsername');
+            if (registerUsernameInput) registerUsernameInput.placeholder = t('username_placeholder');
+            const registerEmailInput = document.getElementById('registerEmail');
+            if (registerEmailInput) registerEmailInput.placeholder = t('email_placeholder');
+            const registerPasswordInput = document.getElementById('registerPassword');
+            if (registerPasswordInput) registerPasswordInput.placeholder = t('password_placeholder');
             document.getElementById('hasAccountText').textContent = t('has_account') + ' ';
             document.getElementById('loginNowText').textContent = t('login_now');
+            
+            // 更新邀请码说明文本
+            const publicCodeText = document.getElementById('publicCodeText');
+            if (publicCodeText) {
+                publicCodeText.textContent = t('public_code');
+            }
             
             // 更新导航菜单
             document.getElementById('conversationsNav').textContent = t('conversations');
@@ -1134,8 +1500,81 @@
             window.location.href = '/register';
         }
 
+        // 动态生成星星
+        function createStars() {
+            const starsContainer = document.querySelector('.stars');
+            if (!starsContainer) return;
+            
+            // 清除现有的星星
+            starsContainer.innerHTML = '';
+            
+            // 生成100个星星
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // 随机位置
+                const top = Math.random() * 100;
+                const left = Math.random() * 100;
+                
+                // 随机大小
+                const size = Math.random() * 3 + 1;
+                
+                // 随机动画延迟
+                const delay = Math.random() * 3;
+                
+                star.style.cssText = `
+                    top: ${top}%;
+                    left: ${left}%;
+                    width: ${size}px;
+                    height: ${size}px;
+                    animation-delay: ${delay}s;
+                `;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 鼠标移动交互效果
+        function addMouseInteraction() {
+            document.addEventListener('mousemove', function(e) {
+                const stars = document.querySelectorAll('.star');
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                
+                stars.forEach((star, index) => {
+                    const rect = star.getBoundingClientRect();
+                    const starX = rect.left + rect.width / 2;
+                    const starY = rect.top + rect.height / 2;
+                    
+                    // 计算距离
+                    const distance = Math.sqrt(
+                        Math.pow(mouseX - starX, 2) + Math.pow(mouseY - starY, 2)
+                    );
+                    
+                    // 如果鼠标靠近星星，让它更亮
+                    if (distance < 100) {
+                        const intensity = 1 - (distance / 100);
+                        star.style.transform = `scale(${1 + intensity * 0.3})`;
+                        star.style.boxShadow = `0 0 ${10 + intensity * 10}px rgba(255, 255, 255, ${0.5 + intensity * 0.5})`;
+                    } else {
+                        star.style.transform = 'scale(1)';
+                        star.style.boxShadow = '';
+                    }
+                });
+            });
+        }
+
         // 页面加载时检查登录状态
         window.onload = async function() {
+            // 创建动态星空
+            createStars();
+            
+            // 添加鼠标交互
+            addMouseInteraction();
+            
             // 加载保存的语言设置
             const savedLanguage = localStorage.getItem('language') || 'zh';
             await switchLanguage(savedLanguage);

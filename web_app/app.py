@@ -1054,14 +1054,28 @@ def handle_test(data):
 @socketio.on('join_room')
 def handle_join_room(data):
     """处理加入房间事件"""
-    print(f'收到加入房间事件: {data}')
+    print(f'=== 收到加入房间事件 ===')
+    print(f'事件数据: {data}')
+    print(f'当前session: {session}')
+    print(f'客户端ID: {request.sid}')
+    
     room = data.get('room')
     if room:
+        print(f'用户请求加入房间: {room}')
+        # 确保房间是字符串类型
+        room = str(room)
         join_room(room)
         print(f'用户已加入房间: {room}')
         
+        # 验证房间加入是否成功
+        from flask_socketio import rooms
+        client_rooms = rooms(request.sid)
+        print(f'客户端 {request.sid} 当前所在房间: {client_rooms}')
+        
         # 更新用户状态
         user_id = session.get('user_id')
+        print(f'从session获取的用户ID: {user_id}')
+        
         if user_id:
             try:
                 # 更新房间成员状态
@@ -1072,15 +1086,22 @@ def handle_join_room(data):
                     membership.is_online = True
                     db.session.commit()
                     print(f'用户 {user_id} 在房间 {room} 中状态已更新为在线')
+                else:
+                    print(f'警告: 用户 {user_id} 不是房间 {room} 的成员')
             except Exception as e:
                 print(f'更新用户状态失败: {e}')
         
         # 通知其他用户有新用户加入
+        print(f'广播user_joined事件到房间 {room}')
         socketio.emit('user_joined', {
             'room': room,
             'user_id': user_id,
             'timestamp': datetime.now().isoformat()
         }, room=room)
+        
+        print(f'=== 加入房间事件处理完成 ===')
+    else:
+        print(f'错误: 房间ID为空')
 
 @socketio.on('leave_room')
 def handle_leave_room(data):
@@ -1269,7 +1290,9 @@ def handle_send_message(data):
         'timestamp': message.timestamp.isoformat(),
         'has_interruption': message.has_interruption,
         'interruption_type': message.interruption_type,
-        'intervention_applied': message.intervention_applied
+        'intervention_applied': message.intervention_applied,
+        'client_id': message_data.get('client_id'),
+        'room': room
     }
     
     print(f'准备广播消息: {message_info}')
@@ -1278,13 +1301,29 @@ def handle_send_message(data):
     # 确保room是字符串类型
     room = str(room)
     
-    # 广播消息到房间
-    socketio.emit('message', message_info, room=room)
-    print(f'消息已广播到房间 {room}')
+    # 获取房间内当前连接的客户端数量
+    from flask_socketio import rooms
+    room_clients = rooms(room)
+    print(f'房间 {room} 内当前连接的客户端: {room_clients}')
+    print(f'当前客户端ID: {request.sid}')
     
-    # 同时向所有客户端广播（确保能收到）
-    socketio.emit('message', message_info)
-    print(f'消息已向所有客户端广播')
+    # 使用更可靠的广播方法
+    try:
+        # 方法1：使用socketio.emit到房间
+        socketio.emit('message', message_info, room=room)
+        print(f'消息已广播到房间 {room}')
+        
+        # 方法2：如果房间为空，广播给所有连接的客户端（备用方案）
+        if not room_clients:
+            print(f'房间 {room} 为空，广播给所有客户端')
+            socketio.emit('message', message_info)
+            print(f'消息已广播给所有客户端')
+            
+    except Exception as e:
+        print(f'广播消息时出错: {e}')
+        # 备用方案：广播给所有客户端
+        socketio.emit('message', message_info)
+        print(f'使用备用方案广播消息')
     
     print(f'=== send_message事件处理完成 ===')
 
@@ -1368,7 +1407,9 @@ async def handle_chat_message(data):
         'timestamp': message.timestamp.isoformat(),
         'has_interruption': message.has_interruption,
         'interruption_type': message.interruption_type,
-        'intervention_applied': message.intervention_applied
+        'intervention_applied': message.intervention_applied,
+        'client_id': message_data.get('client_id'),
+        'room': room
     }
     
     print(f'准备广播消息: {message_info}')
@@ -1377,13 +1418,29 @@ async def handle_chat_message(data):
     # 确保room是字符串类型
     room = str(room)
     
-    # 广播消息到房间
-    socketio.emit('message', message_info, room=room)
-    print(f'消息已广播到房间 {room}')
+    # 获取房间内当前连接的客户端数量
+    from flask_socketio import rooms
+    room_clients = rooms(room)
+    print(f'房间 {room} 内当前连接的客户端: {room_clients}')
+    print(f'当前客户端ID: {request.sid}')
     
-    # 同时向所有客户端广播（确保能收到）
-    socketio.emit('message', message_info)
-    print(f'消息已向所有客户端广播')
+    # 使用更可靠的广播方法
+    try:
+        # 方法1：使用socketio.emit到房间
+        socketio.emit('message', message_info, room=room)
+        print(f'消息已广播到房间 {room}')
+        
+        # 方法2：如果房间为空，广播给所有连接的客户端（备用方案）
+        if not room_clients:
+            print(f'房间 {room} 为空，广播给所有客户端')
+            socketio.emit('message', message_info)
+            print(f'消息已广播给所有客户端')
+            
+    except Exception as e:
+        print(f'广播消息时出错: {e}')
+        # 备用方案：广播给所有客户端
+        socketio.emit('message', message_info)
+        print(f'使用备用方案广播消息')
     
     print(f'=== chat_message事件处理完成 ===')
 
@@ -1435,7 +1492,6 @@ def test_send_message():
         # 广播消息 - 使用socketio.emit而不是emit
         room = str(room_id)
         socketio.emit('message', message_info, room=room)
-        socketio.emit('message', message_info)  # 同时向所有客户端广播
         
         print(f'测试消息已广播: {message_info}')
         

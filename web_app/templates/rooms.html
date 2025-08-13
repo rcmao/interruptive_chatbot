@@ -14,7 +14,9 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #36393f;
+            background: radial-gradient(1200px 600px at 20% -10%, rgba(99, 102, 241, 0.08), transparent),
+                        radial-gradient(1000px 500px at 80% 0%, rgba(147, 51, 234, 0.06), transparent),
+                        #36393f;
             color: #dcddde;
             min-height: 100vh;
         }
@@ -30,8 +32,12 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #40444b;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: rgba(47,49,54,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+            backdrop-filter: blur(18px);
         }
 
         .header h1 {
@@ -41,21 +47,24 @@
         }
 
         .create-room-btn {
-            background: #5865f2;
+            background: rgba(255,255,255,0.08);
             color: white;
-            border: none;
+            border: 1px solid rgba(255,255,255,0.15);
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
+            backdrop-filter: blur(20px);
         }
 
         .create-room-btn:hover {
-            background: #4752c4;
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
         }
 
         /* 用户信息头部样式 */
@@ -139,22 +148,25 @@
         .rooms-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
+            gap: 24px;
             margin-bottom: 30px;
         }
 
         .room-card {
-            background: #2f3136;
-            border-radius: 12px;
+            background: rgba(47,49,54,0.6);
+            border-radius: 16px;
             padding: 20px;
-            border: 1px solid #40444b;
-            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
             cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+            backdrop-filter: blur(14px);
         }
 
         .room-card:hover {
-            border-color: #5865f2;
-            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.18);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 36px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
         .room-header {
@@ -196,6 +208,11 @@
             font-size: 18px;
             font-weight: 600;
             color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
 
         .stat-label {
@@ -211,39 +228,33 @@
 
         .action-btn {
             padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .join-btn {
-            background: #43b581;
-            color: white;
+            transition: all 0.25s ease;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #fff;
+            backdrop-filter: blur(14px);
         }
 
         .join-btn:hover {
-            background: #3ca374;
-        }
-
-        .edit-btn {
-            background: #faa61a;
-            color: white;
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.22);
+            transform: translateY(-1px);
         }
 
         .edit-btn:hover {
-            background: #f39c12;
-        }
-
-        .delete-btn {
-            background: #f04747;
-            color: white;
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.22);
+            transform: translateY(-1px);
         }
 
         .delete-btn:hover {
-            background: #d84040;
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.22);
+            transform: translateY(-1px);
         }
 
         /* 模态框样式 */
@@ -259,13 +270,15 @@
         }
 
         .modal-content {
-            background: #2f3136;
+            background: rgba(47,49,54,0.8);
             margin: 5% auto;
             padding: 30px;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 90%;
             max-width: 500px;
-            border: 1px solid #40444b;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 16px 36px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
         }
 
         .modal-header {
@@ -340,21 +353,25 @@
         }
 
         .btn-primary {
-            background: #5865f2;
+            background: rgba(255,255,255,0.1);
             color: white;
+            border: 1px solid rgba(255,255,255,0.15);
         }
 
         .btn-primary:hover {
-            background: #4752c4;
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.25);
         }
 
         .btn-secondary {
-            background: #40444b;
+            background: rgba(255,255,255,0.08);
             color: #dcddde;
+            border: 1px solid rgba(255,255,255,0.12);
         }
 
         .btn-secondary:hover {
-            background: #4f545c;
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.22);
         }
 
         .loading {
@@ -381,29 +398,44 @@
         /* 语言切换按钮样式 */
         .language-switcher {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow:
+                0 8px 24px rgba(0,0,0,0.12),
+                inset 0 1px 0 rgba(255,255,255,0.12);
         }
 
         .lang-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #5865f2;
-            border-radius: 6px;
-            padding: 6px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            padding: 8px 14px;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
-            transition: all 0.2s;
-            color: #dcddde;
+            letter-spacing: 0.2px;
+            transition: all 0.25s ease;
+            color: rgba(255, 255, 255, 0.92);
         }
 
         .lang-btn:hover {
-            background: #5865f2;
-            color: white;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
         }
 
         .lang-btn.active {
-            background: #5865f2;
-            color: white;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            box-shadow:
+                0 8px 26px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.25);
         }
     </style>
 </head>
@@ -419,8 +451,8 @@
                 </button>
                 <!-- 语言切换按钮 -->
                 <div class="language-switcher">
-                    <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">🇨🇳 中文</button>
-                    <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">🇬🇧 English</button>
+                    <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">中文</button>
+                    <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">English</button>
                 </div>
                 <!-- 用户信息区域 -->
                 <div class="user-info-header" onclick="goToProfile()" title="点击编辑个人资料">

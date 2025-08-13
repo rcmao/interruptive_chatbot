@@ -15,7 +15,9 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #36393f;
+            background: radial-gradient(1200px 600px at 20% -10%, rgba(99, 102, 241, 0.08), transparent),
+                        radial-gradient(1000px 500px at 80% 0%, rgba(147, 51, 234, 0.06), transparent),
+                        #36393f;
             color: #dcddde;
             height: 100vh;
             overflow: hidden;
@@ -29,20 +31,24 @@
         /* 侧边栏 */
         .sidebar {
             width: 240px;
-            background: #2f3136;
+            background: rgba(47,49,54,0.6);
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #202225;
+            border-right: 1px solid rgba(255,255,255,0.1);
             position: relative;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
         }
 
         .sidebar-header {
             padding: 16px;
-            background: #292b2f;
-            border-bottom: 1px solid #202225;
+            background: rgba(47,49,54,0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            backdrop-filter: blur(16px);
         }
 
         .room-info {
@@ -68,7 +74,7 @@
 
         .nav-item {
             padding: 8px 12px;
-            border-radius: 4px;
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -77,16 +83,19 @@
             color: #96989d;
             transition: all 0.2s;
             text-decoration: none;
+            border: 1px solid transparent;
         }
 
         .nav-item:hover {
-            background: #40444b;
+            background: rgba(255,255,255,0.08);
             color: #dcddde;
         }
 
         .nav-item.active {
-            background: #5865f2;
+            background: rgba(255,255,255,0.18);
             color: white;
+            border-color: rgba(255,255,255,0.22);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.22);
         }
 
         /* 主聊天区域 */
@@ -100,12 +109,13 @@
 
         .chat-header {
             padding: 16px 20px;
-            background: #36393f;
-            border-bottom: 1px solid #40444b;
+            background: rgba(47,49,54,0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.12);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+            backdrop-filter: blur(18px);
         }
 
         .chat-header-left {
@@ -161,11 +171,13 @@
         .search-bar {
             display: flex;
             align-items: center;
-            background: #40444b;
-            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
             padding: 6px 12px;
             gap: 8px;
             min-width: 200px;
+            border: 1px solid rgba(255,255,255,0.12);
+            backdrop-filter: blur(12px);
         }
 
         .search-bar input {
@@ -278,11 +290,15 @@
         .input-container {
             display: flex;
             align-items: flex-end;
-            background: #40444b;
-            border-radius: 8px;
+            background: rgba(64, 68, 75, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
             padding: 12px;
             position: relative;
             gap: 8px;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255,255,255,0.08);
         }
 
         .input-actions {
@@ -293,17 +309,22 @@
         }
 
         .input-action-btn {
-            color: #96989d;
+            color: rgba(255,255,255,0.8);
             font-size: 16px;
             cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
+            padding: 8px;
+            border-radius: 10px;
             transition: all 0.2s;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            backdrop-filter: blur(12px);
         }
 
         .input-action-btn:hover {
-            color: #dcddde;
-            background: #4f545c;
+            color: #fff;
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
         }
 
         .input-right-actions {
@@ -632,9 +653,10 @@
             align-items: center;
             gap: 10px;
             padding: 12px 16px;
-            background: #292b2f;
-            border-top: 1px solid #202225;
-            border-radius: 8px 8px 0 0;
+            background: rgba(47,49,54,0.6);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px 12px 0 0;
+            backdrop-filter: blur(14px);
         }
 
         .sidebar-user-avatar {
@@ -680,32 +702,47 @@
             line-height: 1.2;
         }
         
-        /* 语言切换按钮样式 */
+        /* 语言切换按钮样式（与首页一致的玻璃质感分段控件） */
         .language-switcher {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow:
+                0 8px 24px rgba(0,0,0,0.12),
+                inset 0 1px 0 rgba(255,255,255,0.12);
         }
 
         .lang-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #5865f2;
-            border-radius: 6px;
-            padding: 6px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            padding: 8px 14px;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
-            transition: all 0.2s;
-            color: #dcddde;
+            letter-spacing: 0.2px;
+            transition: all 0.25s ease;
+            color: rgba(255, 255, 255, 0.92);
         }
 
         .lang-btn:hover {
-            background: #5865f2;
-            color: white;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
         }
 
         .lang-btn.active {
-            background: #5865f2;
-            color: white;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            box-shadow:
+                0 8px 26px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.25);
         }
     </style>
 </head>
@@ -762,8 +799,8 @@
                     </div>
                     <!-- 语言切换按钮 -->
                     <div class="language-switcher">
-                        <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">🇨🇳 中文</button>
-                        <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">🇬🇧 English</button>
+                        <button class="lang-btn" onclick="switchLanguage('zh')" id="zhBtn">中文</button>
+                        <button class="lang-btn" onclick="switchLanguage('en')" id="enBtn">English</button>
                     </div>
                     <i class="fas fa-bell-slash header-icon" title="静音通知"></i>
                     <i class="fas fa-bell header-icon" title="通知设置"></i>
@@ -793,15 +830,10 @@
                         onkeydown="handleKeyDown(event)"
                     ></textarea>
                     <div class="input-right-actions">
-                        <i class="fas fa-gift input-action-btn" title="礼物"></i>
-                        <i class="fas fa-image input-action-btn" title="GIF"></i>
-                        <i class="fas fa-sticky-note input-action-btn" title="贴纸"></i>
-                        <i class="fas fa-smile input-action-btn" title="表情"></i>
-                        <i class="fas fa-gamepad input-action-btn" title="游戏活动"></i>
                         <button class="send-button" onclick="sendMessage()" id="sendButton">
                             <i class="fas fa-paper-plane"></i>
                         </button>
-            </div>
+                    </div>
         </div>
 
             </div>
@@ -934,16 +966,13 @@
         });
 
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                console.log('页面隐藏，离开房间');
-                if (socket) {
-                    socket.emit('leave_room', { room: String(currentRoomId) });
-                }
-            } else {
-                console.log('页面显示，重新加入房间');
+            if (!document.hidden) {
+                console.log('页面显示，确保已加入房间并同步消息');
                 if (socket) {
                     socket.emit('join_room', { room: String(currentRoomId) });
                 }
+                // 回到前台时同步一次历史消息，避免错过后台期间的消息
+                loadMessages();
             }
         });
 
@@ -1034,17 +1063,31 @@
         function connectWebSocket() {
             console.log('开始连接WebSocket...');
             const token = localStorage.getItem('token');
-            socket = io(`?token=${encodeURIComponent(token)}`);
+            
+            // 统一连接到8080端口的WebSocket服务器
+            // 不管当前页面在哪个端口，都连到8080
+            const wsBase = `${window.location.protocol}//${window.location.hostname}:8080`;
+            console.log('WebSocket连接地址:', wsBase);
+            
+            socket = io(wsBase, { 
+                query: { token },
+                transports: ['websocket', 'polling'],
+                upgrade: true,
+                rememberUpgrade: true
+            });
             
             socket.on('connect', () => {
                 console.log('WebSocket连接成功，房间ID:', currentRoomId);
                 console.log('Socket ID:', socket.id);
+                console.log('连接到的服务器:', wsBase);
+                console.log('连接状态:', socket.connected);
+                console.log('传输方式:', socket.io.engine.transport.name);
                 
                 // 立即加入房间
                 socket.emit('join_room', { room: String(currentRoomId) });
                 console.log('已发送加入房间事件');
                 
-                // 发送一个测试事件
+                // 发送一个测试事件验证连接
                 setTimeout(() => {
                     console.log('发送测试事件...');
                     socket.emit('test', { message: '前端测试消息' });
@@ -1064,9 +1107,16 @@
                 console.log('收到消息:', data);
                 console.log('消息类型:', typeof data);
                 console.log('消息内容:', JSON.stringify(data));
-                console.log('调用addMessage函数...');
+                console.log('消息房间:', data.room, '当前房间:', currentRoomId);
                 
-                // 使用addMessage函数来正确显示消息
+                // 防御：仅处理当前房间的消息
+                if (String(data.room || currentRoomId) !== String(currentRoomId)) {
+                    console.log('消息房间不匹配，跳过');
+                    return;
+                }
+
+                console.log('消息房间匹配，开始渲染...');
+                // 使用addMessage函数来正确显示消息（包含去重）
                 addMessage(data);
                 console.log('addMessage函数调用完成');
             });
@@ -1140,7 +1190,8 @@
             try {
                 const messageData = {
                     content: content,
-                    gender: currentUser.gender || 'unknown'
+                    gender: currentUser.gender || 'unknown',
+                    client_id: `${Date.now()}-${Math.random().toString(36).slice(2)}`
                 };
 
                 console.log('消息数据:', messageData);
@@ -1152,6 +1203,18 @@
                         message: messageData
                     };
                     console.log('发送WebSocket事件:', emitData);
+                    // 乐观更新：先本地加入一条消息
+                    addMessage({
+                        id: `local-${messageData.client_id}`,
+                        content: messageData.content,
+                        author: (currentUser.display_name || currentUser.username),
+                        avatar: currentUser.avatar || '',
+                        timestamp: new Date().toISOString(),
+                        has_interruption: false,
+                        interruption_type: null,
+                        intervention_applied: false,
+                        client_id: messageData.client_id
+                    });
                     socket.emit('send_message', emitData);
                     input.value = '';
                     console.log('消息已发送到WebSocket');
@@ -1186,6 +1249,11 @@
                     console.error('找不到消息容器元素');
                     return;
                 }
+
+            // 如果已经渲染过相同client_id的消息则跳过，避免重复
+            if (data.client_id && messagesContainer.querySelector(`[data-client-id="${data.client_id}"]`)) {
+                return;
+            }
             
             // 清除欢迎消息
             if (messagesContainer.children.length === 1 && 
@@ -1195,6 +1263,9 @@
             
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message';
+            if (data.client_id) {
+                messageDiv.dataset.clientId = data.client_id;
+            }
             
             const avatar = document.createElement('div');
             avatar.className = 'message-avatar';
